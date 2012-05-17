@@ -1,0 +1,210 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		201FED071564913400041772 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 201FED061564913400041772 /* main.cpp */; };
+		201FED091564913400041772 /* ngram_converter_cpp.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 201FED081564913400041772 /* ngram_converter_cpp.1 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		201FED001564913400041772 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				201FED091564913400041772 /* ngram_converter_cpp.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		201FED021564913400041772 /* ngram-converter-cpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ngram-converter-cpp"; sourceTree = BUILT_PRODUCTS_DIR; };
+		201FED061564913400041772 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		201FED081564913400041772 /* ngram_converter_cpp.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ngram_converter_cpp.1; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		201FECFF1564913400041772 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		201FECF71564913300041772 = {
+			isa = PBXGroup;
+			children = (
+				201FED051564913400041772 /* ngram-converter-cpp */,
+				201FED031564913400041772 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		201FED031564913400041772 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				201FED021564913400041772 /* ngram-converter-cpp */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		201FED051564913400041772 /* ngram-converter-cpp */ = {
+			isa = PBXGroup;
+			children = (
+				201FED061564913400041772 /* main.cpp */,
+				201FED081564913400041772 /* ngram_converter_cpp.1 */,
+			);
+			path = "ngram-converter-cpp";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		201FED011564913400041772 /* ngram-converter-cpp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 201FED0C1564913400041772 /* Build configuration list for PBXNativeTarget "ngram-converter-cpp" */;
+			buildPhases = (
+				201FECFE1564913400041772 /* Sources */,
+				201FECFF1564913400041772 /* Frameworks */,
+				201FED001564913400041772 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ngram-converter-cpp";
+			productName = "ngram-converter-cpp";
+			productReference = 201FED021564913400041772 /* ngram-converter-cpp */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		201FECF91564913300041772 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 201FECFC1564913300041772 /* Build configuration list for PBXProject "ngram-converter-cpp" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 201FECF71564913300041772;
+			productRefGroup = 201FED031564913400041772 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				201FED011564913400041772 /* ngram-converter-cpp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		201FECFE1564913400041772 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				201FED071564913400041772 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		201FED0A1564913400041772 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		201FED0B1564913400041772 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		201FED0D1564913400041772 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		201FED0E1564913400041772 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		201FECFC1564913300041772 /* Build configuration list for PBXProject "ngram-converter-cpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				201FED0A1564913400041772 /* Debug */,
+				201FED0B1564913400041772 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		201FED0C1564913400041772 /* Build configuration list for PBXNativeTarget "ngram-converter-cpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				201FED0D1564913400041772 /* Debug */,
+				201FED0E1564913400041772 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 201FECF91564913300041772 /* Project object */;
+}
