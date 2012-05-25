@@ -29,6 +29,7 @@ def gen_test():
     for i in range(128):
         yield 1
 
+
 class BitArray(object):
     def __init__(self):
         self._bytearray = bytearray()
@@ -318,6 +319,7 @@ def DecodeFiles(output_filename_prefix, verification_filename, block_size,
 
     print 'Done.'
 
+
 def main():
     def output_data(f_out_index, f_out_data, ngram_block):
         (first_token_id, first_context_id) = ngram_block.GetFirstIds()
@@ -439,6 +441,7 @@ def main():
 
     if verification_filename:
         DecodeFiles(output_filename_prefix, verification_filename)
+
 
 if __name__ == '__main__':
     main()
