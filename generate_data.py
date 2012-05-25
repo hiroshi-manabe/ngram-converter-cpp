@@ -179,11 +179,14 @@ class NgramBlock(object):
         self.__init__(self._max_size)
         return data
 
+
 def EncodeScore(x, min_score):
     return int(x * MAX_INT_SCORE / min_score)
 
+
 def DecodeScore(x, min_score):
     return x * min_score / MAX_INT_SCORE
+
 
 def DecodeFiles(output_filename_prefix, verification_filename, block_size,
                 min_score):
