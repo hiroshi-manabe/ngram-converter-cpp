@@ -1,4 +1,4 @@
-#include "converter.h"
+#include "lm.h"
 
 void Usage() {
   printf("Usage: converter_main -i <input filename prefix>");

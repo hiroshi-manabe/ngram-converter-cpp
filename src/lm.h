@@ -1,15 +1,21 @@
-#ifndef NGRAM_CONVERTER_CONVERTER_H_INCLUDED_
-#define NGRAM_CONVERTER_CONVERTER_H_INCLUDED_
+#ifndef NGRAM_CONVERTER_LM_H_INCLUDED_
+#define NGRAM_CONVERTER_LM_H_INCLUDED_
 
 #include <marisa.h>
 #include <marisa/scoped-array.h>
 #include <marisa/scoped-ptr.h>
 
 #include <memory>
+#include <pair>
 #include <stdint.h>
 #include <string>
 
+#include "pairs.h"
+
+using std::pair;
 using std::string;
+using std::vector;
+
 using marisa::scoped_ptr;
 using marisa::scoped_array;
 
@@ -20,10 +26,14 @@ using marisa::scoped_array;
 #define FLAGS_HAS_BACKOFF 2
 #define MIN_SCORE -7.0
 #define INVALID_SCORE -65536.0
+#define INVALID_TOKEN_ID -1
 
-#define EXT_TRIE ".trie"
+#define EXT_KEY ".key"
+#define EXT_PAIR ".pair"
 #define EXT_INDEX ".index"
 #define EXT_DATA ".data"
+
+#define PAIR_SEPARATOR "/"
 
 #define MAX_N 10
 
@@ -49,14 +59,18 @@ struct NgramData {
 
 class LM {
  public:
-  bool LoadDics(string filename_prefix);
-  bool LoadTrie(string filename);
-  bool LoadNgrams(string filename_prefix);
-  void GetUnigram(int token_id, NgramData* ngram);
+  bool LoadDics(const string filename_prefix);
+  bool LoadTrie(const string filename);
+  bool LoadNgrams(const string filename_prefix);
   bool GetNgram(int n, int token_id, int context_id, int* new_context_id,
 		NgramData* ngram);
+  int GetTokenId(const string str);
+  bool GetPairs(const string src, vector<pair<string, string> > pairs);
+
  private:
-  marisa::Trie trie_;
+  void GetUnigram(int token_id, NgramData* ngram);
+  marisa::Trie trie_key_;
+  marisa::Trie trie_pair;
   scoped_array<uint8_t> ngram_data_;
   scoped_array<UnigramIndex> unigrams_;
   scoped_array<NgramIndex> ngram_indices_[MAX_N];
@@ -66,4 +80,4 @@ class LM {
 };
 
 }  // namespace NgramConverter
-#endif  // NGRAM_CONVERTER_CONVERTER_H_INCLUDED_
+#endif  // NGRAM_CONVERTER_LM_H_INCLUDED_

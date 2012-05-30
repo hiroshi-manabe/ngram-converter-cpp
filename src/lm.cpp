@@ -1,4 +1,4 @@
-#include "converter.h"
+#include "lm.h"
 
 #include <cstdio>
 
@@ -99,7 +99,7 @@ bool DecodeBlock(const uint8_t* buf, size_t buf_size,
 
 namespace NgramConverter {
 
-bool LM::LoadDics(string filename_prefix) {
+bool LM::LoadDics(const string filename_prefix) {
   if (!LoadTrie(filename_prefix + EXT_TRIE)) {
     return false;
   }
@@ -109,12 +109,13 @@ bool LM::LoadDics(string filename_prefix) {
   return true;
 }
 
-bool LM::LoadTrie(string filename) {
-  trie_.load(filename.c_str());
+bool LM::LoadTries(const string filename_prefix) {
+  trie_key_.load((filename_prefix + EXT_KEY).c_str());
+  trie_pair_.load((filename_prefix + EXT_PAIR).c_str());
   return true;
 }
 
-bool LM::LoadNgrams(string filename_prefix) {
+bool LM::LoadNgrams(const string filename_prefix) {
   bool is_success = false;
   size_t size_read;
   size_t size_to_read;
@@ -167,8 +168,9 @@ bool LM::LoadNgrams(string filename_prefix) {
 
     ngram_indices_[cur_n].reset(new NgramIndex[ngram_count]);
     size_to_read = BlockCount(ngram_count);
-    size_read = fread(ngram_indices_[cur_n].get(), sizeof(NgramIndex), size_to_read,
-		      fp_index);
+    size_read = fread(ngram_indices_[cur_n].get(), sizeof(NgramIndex),
+		      size_to_read, fp_index);
+
     if (size_read < size_to_read) {
       goto LOAD_NGRAMS_END;
     }
@@ -241,6 +243,33 @@ bool LM::GetNgram(int n, int token_id, int context_id, int* new_context_id,
     }
   }
   return false;
+}
+
+bool LM::GetPairs(const string src, vector<pair<string, string> >* pairs) {
+  Marisa::Agent agent_key;
+  agent_key.set_query(src.c_str());
+
+  while (trie_key_.common_prefix_search(agent_key)) {
+    Marisa::Agent agent_pair;
+    string key_str(agent_key.key().ptr(), agent_key.key().length());
+
+    key_str += PAIR_SEPARATOR;
+    agent_pair.set_query(key_str.c_str(), key_str.size());
+
+    while (trie_pair_.predictive_search(agent_pair)) {
+      string pair_str(agent_pair.key().prt(), agent_pair.key().length());
+      size_t pos = pair_str.find(PAIR_SEPARATOR);
+
+      if (pos == string::npos) {
+	return false;
+      }
+
+      string src = pair_str.substr(0, pos);
+      string dst = pair_str.substr(pos);
+      pairs->push_back(pair(src, dst));
+    }
+  }
+  return true;
 }
 
 }  // namespace NgramConverter

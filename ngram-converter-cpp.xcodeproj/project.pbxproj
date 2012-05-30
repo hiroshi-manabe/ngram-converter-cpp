@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		201FED071564913400041772 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 201FED061564913400041772 /* main.cpp */; };
-		201FED091564913400041772 /* ngram_converter_cpp.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 201FED081564913400041772 /* ngram_converter_cpp.1 */; };
+		202637D51573718F008894B3 /* converter_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D41573718F008894B3 /* converter_main.cpp */; };
+		202637D8157606D1008894B3 /* lm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D6157606D1008894B3 /* lm.cpp */; };
+		202637DB157618F1008894B3 /* pair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D9157618F1008894B3 /* pair.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -18,7 +19,6 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				201FED091564913400041772 /* ngram_converter_cpp.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -26,8 +26,11 @@
 
 /* Begin PBXFileReference section */
 		201FED021564913400041772 /* ngram-converter-cpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ngram-converter-cpp"; sourceTree = BUILT_PRODUCTS_DIR; };
-		201FED061564913400041772 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		201FED081564913400041772 /* ngram_converter_cpp.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ngram_converter_cpp.1; sourceTree = "<group>"; };
+		202637D41573718F008894B3 /* converter_main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = converter_main.cpp; path = src/converter_main.cpp; sourceTree = SOURCE_ROOT; };
+		202637D6157606D1008894B3 /* lm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lm.cpp; path = src/lm.cpp; sourceTree = SOURCE_ROOT; };
+		202637D7157606D1008894B3 /* lm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lm.h; path = src/lm.h; sourceTree = SOURCE_ROOT; };
+		202637D9157618F1008894B3 /* pair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pair.cpp; path = src/pair.cpp; sourceTree = SOURCE_ROOT; };
+		202637DA157618F1008894B3 /* pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pair.h; path = src/pair.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,8 +63,11 @@
 		201FED051564913400041772 /* ngram-converter-cpp */ = {
 			isa = PBXGroup;
 			children = (
-				201FED061564913400041772 /* main.cpp */,
-				201FED081564913400041772 /* ngram_converter_cpp.1 */,
+				202637D9157618F1008894B3 /* pair.cpp */,
+				202637DA157618F1008894B3 /* pair.h */,
+				202637D6157606D1008894B3 /* lm.cpp */,
+				202637D7157606D1008894B3 /* lm.h */,
+				202637D41573718F008894B3 /* converter_main.cpp */,
 			);
 			path = "ngram-converter-cpp";
 			sourceTree = "<group>";
@@ -116,7 +122,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				201FED071564913400041772 /* main.cpp in Sources */,
+				202637D51573718F008894B3 /* converter_main.cpp in Sources */,
+				202637D8157606D1008894B3 /* lm.cpp in Sources */,
+				202637DB157618F1008894B3 /* pair.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +154,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lmarisa";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -166,6 +175,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_LDFLAGS = "-lmarisa";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -203,6 +213,7 @@
 				201FED0E1564913400041772 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
