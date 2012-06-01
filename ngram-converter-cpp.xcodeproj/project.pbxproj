@@ -10,6 +10,7 @@
 		202637D51573718F008894B3 /* converter_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D41573718F008894B3 /* converter_main.cpp */; };
 		202637D8157606D1008894B3 /* lm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D6157606D1008894B3 /* lm.cpp */; };
 		202637DB157618F1008894B3 /* pair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D9157618F1008894B3 /* pair.cpp */; };
+		202637DD15761996008894B3 /* converter_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637DC15761996008894B3 /* converter_test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,6 +32,7 @@
 		202637D7157606D1008894B3 /* lm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lm.h; path = src/lm.h; sourceTree = SOURCE_ROOT; };
 		202637D9157618F1008894B3 /* pair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pair.cpp; path = src/pair.cpp; sourceTree = SOURCE_ROOT; };
 		202637DA157618F1008894B3 /* pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pair.h; path = src/pair.h; sourceTree = SOURCE_ROOT; };
+		202637DC15761996008894B3 /* converter_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = converter_test.cpp; path = src/converter_test.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 		201FED051564913400041772 /* ngram-converter-cpp */ = {
 			isa = PBXGroup;
 			children = (
+				202637DC15761996008894B3 /* converter_test.cpp */,
 				202637D9157618F1008894B3 /* pair.cpp */,
 				202637DA157618F1008894B3 /* pair.h */,
 				202637D6157606D1008894B3 /* lm.cpp */,
@@ -125,6 +128,7 @@
 				202637D51573718F008894B3 /* converter_main.cpp in Sources */,
 				202637D8157606D1008894B3 /* lm.cpp in Sources */,
 				202637DB157618F1008894B3 /* pair.cpp in Sources */,
+				202637DD15761996008894B3 /* converter_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,7 +158,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lmarisa";
+				OTHER_LDFLAGS = (
+					"-lmarisa",
+					"-lgtest",
+				);
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -175,7 +182,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OTHER_LDFLAGS = "-lmarisa";
+				OTHER_LDFLAGS = (
+					"-lmarisa",
+					"-lgtest",
+				);
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -183,6 +193,7 @@
 		201FED0D1564913400041772 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = "-lmarisa";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -190,6 +201,7 @@
 		201FED0E1564913400041772 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = "-lmarisa";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

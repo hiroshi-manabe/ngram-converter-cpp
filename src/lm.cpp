@@ -100,7 +100,7 @@ bool DecodeBlock(const uint8_t* buf, size_t buf_size,
 namespace NgramConverter {
 
 bool LM::LoadDics(const string filename_prefix) {
-  if (!LoadTrie(filename_prefix + EXT_TRIE)) {
+  if (!LoadTries(filename_prefix)) {
     return false;
   }
   if (!LoadNgrams(filename_prefix)) {
@@ -193,8 +193,8 @@ void LM::GetUnigram(int token_id, NgramData* ngram) {
   ngram->backoff = DecodeBackoff(unigrams_[token_id].backoff_int);
 }
 
-bool LM::GetNgram(int n, int token_id, int context_id, int* new_context_id,
-		  NgramData* ngram) {
+bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
+		  uint32_t* new_context_id, NgramData* ngram) {
   if (n == 0 || n > n_) {
     return false;
   }
@@ -207,7 +207,7 @@ bool LM::GetNgram(int n, int token_id, int context_id, int* new_context_id,
   // n > 1
   size_t block_count = BlockCount(ngram_counts_[n]);
 
-  int block_num;
+  size_t block_num;
   for (block_num = 0; block_num < block_count; ++block_num) {
     if (ngram_indices_[n][block_num].token_id < token_id) {
       continue;
@@ -245,28 +245,53 @@ bool LM::GetNgram(int n, int token_id, int context_id, int* new_context_id,
   return false;
 }
 
-bool LM::GetPairs(const string src, vector<pair<string, string> >* pairs) {
-  Marisa::Agent agent_key;
-  agent_key.set_query(src.c_str());
+bool LM::GetTokenId(const string src, const string dst, uint32_t* token_id) {
+  marisa::Agent agent;
+  
+  char key[MAX_KEY_LEN+1];
+  if (src.size() + strlen(PAIR_SEPARATOR) + dst.size() > MAX_KEY_LEN) {
+    return false;
+  }
+  strcpy(key, (src + PAIR_SEPARATOR + dst).c_str());
+  agent.set_query(key);
+
+  if (!trie_pair_.lookup(agent)) {
+    return false;
+  }
+
+  *token_id = agent.key().id();
+  return true;
+}
+
+bool LM::GetPairs(const string src, vector<Pair>* results) {
+  marisa::Agent agent_key;
+  if (src.size() + strlen(PAIR_SEPARATOR) > MAX_KEY_LEN) {
+    return false;
+  }
+  char buf[MAX_KEY_LEN+1];
+  strcpy(buf, src.c_str());
+  agent_key.set_query(buf, src.size());
 
   while (trie_key_.common_prefix_search(agent_key)) {
-    Marisa::Agent agent_pair;
+    marisa::Agent agent_pair;
+    char buf2[MAX_KEY_LEN+1];
     string key_str(agent_key.key().ptr(), agent_key.key().length());
-
     key_str += PAIR_SEPARATOR;
-    agent_pair.set_query(key_str.c_str(), key_str.size());
+    strcpy(buf2, key_str.c_str());
+    agent_pair.set_query(buf2, key_str.size());
 
     while (trie_pair_.predictive_search(agent_pair)) {
-      string pair_str(agent_pair.key().prt(), agent_pair.key().length());
+      string pair_str(agent_pair.key().ptr(), agent_pair.key().length());
+      uint32_t token_id = agent_pair.key().id();
       size_t pos = pair_str.find(PAIR_SEPARATOR);
 
-      if (pos == string::npos) {
+      if (pos == string::npos || pos >= pair_str.size() - 1) {
 	return false;
       }
 
       string src = pair_str.substr(0, pos);
-      string dst = pair_str.substr(pos);
-      pairs->push_back(pair(src, dst));
+      string dst = pair_str.substr(pos + strlen(PAIR_SEPARATOR));
+      results->push_back(Pair(src, dst, token_id));
     }
   }
   return true;

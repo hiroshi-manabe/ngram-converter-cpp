@@ -4,30 +4,38 @@
 #include <string>
 #include <vector>
 
-#include "converter.h"
-
 using std::string;
 using std::vector;
 
 #define UNKNOWN_STRING "UNK"
 
-namespace NgramConverter{
+namespace NgramConverter {
+
+class LM;
 
 struct Pair {
-  Pair(string src_str, string dst_str, int start_pos, int end_pos);
+  Pair(string src_str, string dst_str, uint32_t token_id) :
+  src_str(src_str), dst_str(dst_str), token_id(token_id) {};
   string src_str;
   string dst_str;
+  uint32_t token_id;
+};
+
+struct PairWithPos {
+  PairWithPos(Pair pair, int start_pos, int end_pos) :
+  pair(pair), start_pos(start_pos), end_pos(end_pos) {};
+  Pair pair;
   int start_pos;
   int end_pos;
 };
 
 class PairManager {
  public:
-  bool Build(const string src, const LM& lm);
-  vector<Pair> GetPairsAt(int pos);
+  bool Build(const string src, LM& lm);
+  vector<PairWithPos> GetPairsAt(int pos);
 
  private:
-  vector<vector<Pair> > pairs_;
+  vector<vector<PairWithPos> > pairs_;
 };
 
 }  // namespace NgramConverter

@@ -5,8 +5,6 @@ void Usage() {
   exit(0);
 }
 
-
-
 int main(int argc, char* argv[]) {
   string input_filename_prefix;
 

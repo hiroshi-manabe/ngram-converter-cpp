@@ -1,5 +1,6 @@
 #include <utility>
 
+#include "lm.h"
 #include "pair.h"
 
 using std::pair;
@@ -18,30 +19,30 @@ int NextUtf8Pos(const string str, int pos) {
 
 namespace NgramConverter{
 
-bool PairManager::Build(const string src, const LM& lm) {
+bool PairManager::Build(const string src, LM& lm) {
   pairs_.resize(src.size() + 1);
 
-  for (size_t pos = 0; pos < src.size(); pos = NextUtf8Pos(str, pos)) {
-    vector<pair<string, string> > results;
+  for (size_t pos = 0; pos < src.size(); pos = NextUtf8Pos(src, pos)) {
+    vector<Pair> results;
 
     if (!lm.GetPairs(src, &results)) {
       return false;
     }
-    for (vector<pair<string, string> >::const_iterator it = results.begin();
+    for (vector<Pair>::const_iterator it = results.begin();
 	 it != results.end(); ++it) {
-      pairs_[pos].push_back(Pair(it->first, it->second,
-				 pos, pos + it->first->size()));
+      pairs_[pos].push_back(PairWithPos(*it, pos, pos + it->src_str.size()));
     }
     if (results.size() == 0) {
-      size_t next_pos = NextUtf8Pos(str, pos);
-      pairs_[pos].push_back(Pair(UNKNOWN_STRING,
-				 src.substr(pos, next_pos - pos),
-				 pos, next_pos));
+      size_t next_pos = NextUtf8Pos(src, pos);
+      pairs_[pos].push_back(PairWithPos(Pair(UNKNOWN_STRING,
+					     src.substr(pos, next_pos - pos), 0),
+					pos, next_pos));
     }
   }
+  return true;
 }
 
-vector<Pair> GetPairsAt(int pos) {
+vector<PairWithPos> PairManager::GetPairsAt(int pos) {
   return pairs_[pos];
 }
 
