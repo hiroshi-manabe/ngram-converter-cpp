@@ -186,7 +186,7 @@ bool LM::LoadNgrams(const string filename_prefix) {
   return is_success;
 }
 
-void LM::GetUnigram(int token_id, NgramData* ngram) {
+void LM::GetUnigram(int token_id, NgramData* ngram) const {
   ngram->token_id = token_id;
   ngram->context_id = 0;
   ngram->score = DecodeScore(unigrams_[token_id].score_int);
@@ -194,7 +194,7 @@ void LM::GetUnigram(int token_id, NgramData* ngram) {
 }
 
 bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
-		  uint32_t* new_context_id, NgramData* ngram) {
+		  uint32_t* new_context_id, NgramData* ngram) const {
   if (n == 0 || n > n_) {
     return false;
   }
@@ -245,7 +245,8 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   return false;
 }
 
-bool LM::GetTokenId(const string src, const string dst, uint32_t* token_id) {
+bool LM::GetTokenId(const string src, const string dst,
+		    uint32_t* token_id) const {
   marisa::Agent agent;
   
   char key[MAX_KEY_LEN+1];
@@ -263,7 +264,7 @@ bool LM::GetTokenId(const string src, const string dst, uint32_t* token_id) {
   return true;
 }
 
-bool LM::GetPairs(const string src, vector<Pair>* results) {
+bool LM::GetPairs(const string src, vector<Pair>* results) const {
   marisa::Agent agent_key;
   if (src.size() + strlen(PAIR_SEPARATOR) > MAX_KEY_LEN) {
     return false;

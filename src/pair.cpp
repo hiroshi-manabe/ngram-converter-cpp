@@ -42,7 +42,7 @@ bool PairManager::Build(const string src, LM& lm) {
   return true;
 }
 
-vector<PairWithPos> PairManager::GetPairsAt(int pos) {
+vector<PairWithPos> PairManager::GetPairsAt(int pos) const {
   return pairs_[pos];
 }
 

@@ -63,19 +63,19 @@ class LM {
   bool LoadNgrams(const string filename_prefix);
   bool GetNgram(int n, uint32_t token_id, uint32_t context_id,
 		uint32_t* new_context_id,
-		NgramData* ngram);
-  bool GetTokenId(const string src, const string dst, uint32_t* token_id);
-  bool GetPairs(const string src, vector<Pair>* results);
+		NgramData* ngram) const;
+  bool GetTokenId(const string src, const string dst, uint32_t* token_id) const;
+  bool GetPairs(const string src, vector<Pair>* results) const;
 
  private:
-  void GetUnigram(int token_id, NgramData* ngram);
+  void GetUnigram(int token_id, NgramData* ngram) const;
   marisa::Trie trie_key_;
   marisa::Trie trie_pair_;
   scoped_array<uint8_t> ngram_data_;
   scoped_array<UnigramIndex> unigrams_;
   scoped_array<NgramIndex> ngram_indices_[MAX_N];
   size_t ngram_counts_[MAX_N];
-  NgramData ngram_data_work_[BLOCK_SIZE];
+  mutable NgramData ngram_data_work_[BLOCK_SIZE];
   int n_;
 };
 

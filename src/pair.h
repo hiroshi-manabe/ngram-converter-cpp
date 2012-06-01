@@ -32,7 +32,7 @@ struct PairWithPos {
 class PairManager {
  public:
   bool Build(const string src, LM& lm);
-  vector<PairWithPos> GetPairsAt(int pos);
+  vector<PairWithPos> GetPairsAt(int pos) const;
 
  private:
   vector<vector<PairWithPos> > pairs_;
