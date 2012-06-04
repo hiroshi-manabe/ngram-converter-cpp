@@ -34,15 +34,24 @@ bool PairManager::Build(const string src, LM& lm) {
     }
     if (results.size() == 0) {
       size_t next_pos = NextUtf8Pos(src, pos);
-      pairs_[pos].push_back(Pair(UNKNOWN_STRING,
-				 src.substr(pos, next_pos - pos), 0));
+      Pair unknown_pair;
+      if (lm.GetSpecialPair(UNK_STR, &unknown_pair)) {
+	return false;
+      }
+      pairs_[pos].push_back(unknown_pair);
     }
   }
+
+  Pair eos_pair;
+  if (lm.GetSpecialPair(EOS_STR, &eos_pair)) {
+    return false;
+  }
+  pairs_[src.size()].push_back(eos_pair);
   return true;
 }
 
-vector<Pair> PairManager::GetPairsAt(int pos) const {
-  return pairs_[pos];
+void PairManager::GetPairsAt(int pos, vector<Pair>* pairs) const {
+  pairs = &pairs_[pos];
 }
 
 }  // namespace NgramConverter

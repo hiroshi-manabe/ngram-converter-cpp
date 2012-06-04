@@ -11,11 +11,23 @@ uint32_t Node::GetTokenId() const {
 }
 
 bool Node::operator<(const Node& another) const {
+  int result;
+
+  result = this->end_pos - another.end_pos;
+  if (result) {
+    return result;
+  }
+
+  result = (another.valid_n == 0) - (this->valid_n == 0);
+  if (result) {
+    return result;
+  }
+
   const Node* this_left = this;
   const Node* another_left = &another;
 
   for (size_t i = 0; i < std::min(this->valid_n, another.valid_n); ++i) {
-    int result = (this_left->GetTokenId() - another_left->GetTokenId());
+    result = (this_left->GetTokenId() - another_left->GetTokenId());
     if (result) {
       return result;
     }
@@ -23,10 +35,6 @@ bool Node::operator<(const Node& another) const {
     another_left = another_left->left_node;
   }
   return this->valid_n - another.valid_n;
-}
-
-int Node::GetEndPos() const {
-  return pair->token_id;
 }
 
 bool Lattice::AddNode(Node node) {
@@ -52,7 +60,18 @@ bool Lattice::AddNode(Node node) {
   end_nodes_.push_back(pair<map<Node, Node>, int>());
 
   map<Node, Node>& last_map = end_nodes_.back().first;
-  map<Node, Node>::const_iterator it = last_map.find(node);
+
+  map<Node, Node>::const_iterator it;
+  if (node.backoff != INVALID_SCORE) {
+    it = last_map.find(node);
+  } else {
+    for (; --node.valid_n; node.valid_n >= 0) {
+      it = last_map.find(node);
+      if (it != last_map.en()) {
+	break;
+      }
+    }
+  }
 
   if (it == last_map.end() || node.path_score > it->second.path_score) {
     last_map.insert(pair<Node, Node>(node, node));
@@ -60,16 +79,16 @@ bool Lattice::AddNode(Node node) {
   return true;
 }
 
-const map<Node, Node>& Lattice::GetEndNodesAt(int pos, bool& found) {
+bool Lattice::GetEndNodesAt(int pos, const map<Node, Node>* nodes) {
   found = false;
   for (list<pair<map<Node, Node>, int> >::const_reverse_iterator it
 	 = end_nodes_.rbegin(); it != end_nodes_.rend(); ++it) {
     if (it->second == pos) {
       found = true;
-      return it->first;
+      nodes = &(it->first);
     }
   }
-  throw std::out_of_range("Not found");
+  return found;
 }
 
 }  // namespace NgramConverter

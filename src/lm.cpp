@@ -264,6 +264,26 @@ bool LM::GetTokenId(const string src, const string dst,
   return true;
 }
 
+bool LM::GetSpecialPair(const string src, Pair* pair) const {
+  marisa::Agnet agent;
+  char buf[MAX_KEY_LEN];
+
+  if (src.size() > MAX_KEN_LEN) {
+    return false;
+  }
+
+  strcpy(buf, src.c_str());
+  agent_key.set_query(buf, src.size());
+
+  if (!trie_pair_.lookup(agent)) {
+    return false;
+  }
+  pair->src_str = src;
+  pair->dst_str = "";
+  token_id = agent.key().id();
+  return true;
+}
+
 bool LM::GetPairs(const string src, vector<Pair>* results) const {
   marisa::Agent agent_key;
   if (src.size() + strlen(PAIR_SEPARATOR) > MAX_KEY_LEN) {

@@ -16,27 +16,24 @@ namespace NgramConverter {
 class Pair;
 
 struct Node {
-  Node(const Pair* pair, const Node* left_node, size_t valid_n, double score) :
-  pair(pair), left_node(left_node), valid_n(valid_n) {};
   uint32_t GetTokenId() const;
   bool operator<(const Node& another) const;
-  int GetEndPos() const;
 
   const Pair* pair;
   const Node* left_node;
+
+  int end_pos;
+  uint32_t context_id;
   size_t valid_n;
   double node_score;
-  double node_backoff;
+  double backoff;
   double path_score;
-
- private:
-  int32_t GetTokenId();
 };
 
 class Lattice {
  public:
   bool AddNode(Node node);
-  const map<Node, Node>& GetEndNodesAt(int pos, bool& found);
+  bool GetEndNodesAt(int pos, const map<Node, Node>* nodes);
 
  private:
   list<pair<map<Node, Node>, int> > end_nodes_;

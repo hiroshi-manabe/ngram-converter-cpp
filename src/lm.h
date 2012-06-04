@@ -22,6 +22,9 @@ using marisa::scoped_array;
 #define PAIR_SEPARATOR "/"
 #define MAX_KEY_LEN 255
 #define MAX_N 10
+#define BOS_STR "<s>"
+#define EOS_STR "</s>"
+#define UNK_STR "UNK"
 
 #define MAX_INT_SCORE 255
 #define BACKOFF_DISCOUNT 128
@@ -65,6 +68,7 @@ class LM {
 		uint32_t* new_context_id,
 		NgramData* ngram) const;
   bool GetTokenId(const string src, const string dst, uint32_t* token_id) const;
+  bool GetSpecialPair(const string src, Pair* pair) const;
   bool GetPairs(const string src, vector<Pair>* results) const;
 
  private:
