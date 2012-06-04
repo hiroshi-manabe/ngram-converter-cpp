@@ -21,21 +21,13 @@ struct Pair {
   uint32_t token_id;
 };
 
-struct PairWithPos {
-  PairWithPos(Pair pair, int start_pos, int end_pos) :
-  pair(pair), start_pos(start_pos), end_pos(end_pos) {};
-  Pair pair;
-  int start_pos;
-  int end_pos;
-};
-
 class PairManager {
  public:
   bool Build(const string src, LM& lm);
-  vector<PairWithPos> GetPairsAt(int pos) const;
+  vector<Pair> GetPairsAt(int pos) const;
 
  private:
-  vector<vector<PairWithPos> > pairs_;
+  vector<vector<Pair> > pairs_;
 };
 
 }  // namespace NgramConverter

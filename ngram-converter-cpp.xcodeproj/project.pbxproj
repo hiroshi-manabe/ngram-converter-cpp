@@ -11,6 +11,7 @@
 		202637D8157606D1008894B3 /* lm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D6157606D1008894B3 /* lm.cpp */; };
 		202637DB157618F1008894B3 /* pair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637D9157618F1008894B3 /* pair.cpp */; };
 		202637DD15761996008894B3 /* converter_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637DC15761996008894B3 /* converter_test.cpp */; };
+		202637E51578B0A8008894B3 /* lattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 202637E31578B0A8008894B3 /* lattice.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +34,8 @@
 		202637D9157618F1008894B3 /* pair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pair.cpp; path = src/pair.cpp; sourceTree = SOURCE_ROOT; };
 		202637DA157618F1008894B3 /* pair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pair.h; path = src/pair.h; sourceTree = SOURCE_ROOT; };
 		202637DC15761996008894B3 /* converter_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = converter_test.cpp; path = src/converter_test.cpp; sourceTree = SOURCE_ROOT; };
+		202637E31578B0A8008894B3 /* lattice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lattice.cpp; path = src/lattice.cpp; sourceTree = SOURCE_ROOT; };
+		202637E41578B0A8008894B3 /* lattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lattice.h; path = src/lattice.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +68,8 @@
 		201FED051564913400041772 /* ngram-converter-cpp */ = {
 			isa = PBXGroup;
 			children = (
+				202637E31578B0A8008894B3 /* lattice.cpp */,
+				202637E41578B0A8008894B3 /* lattice.h */,
 				202637DC15761996008894B3 /* converter_test.cpp */,
 				202637D9157618F1008894B3 /* pair.cpp */,
 				202637DA157618F1008894B3 /* pair.h */,
@@ -129,6 +134,7 @@
 				202637D8157606D1008894B3 /* lm.cpp in Sources */,
 				202637DB157618F1008894B3 /* pair.cpp in Sources */,
 				202637DD15761996008894B3 /* converter_test.cpp in Sources */,
+				202637E51578B0A8008894B3 /* lattice.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
