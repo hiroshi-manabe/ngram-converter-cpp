@@ -66,7 +66,7 @@ class LM {
   bool LoadNgrams(const string filename_prefix);
   bool GetNgram(int n, uint32_t token_id, uint32_t context_id,
 		uint32_t* new_context_id,
-		NgramData* ngram) const;
+		NgramData* ngram_data) const;
   bool GetTokenId(const string src, const string dst, uint32_t* token_id) const;
   bool GetSpecialPair(const string src, Pair* pair) const;
   bool GetPairs(const string src, vector<Pair>* results) const;

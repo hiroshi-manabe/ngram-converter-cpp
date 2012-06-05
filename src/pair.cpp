@@ -19,7 +19,7 @@ int NextUtf8Pos(const string str, int pos) {
 
 namespace NgramConverter{
 
-bool PairManager::Build(const string src, LM& lm) {
+bool PairManager::Build(const string src, const LM& lm) {
   pairs_.resize(src.size() + 1);
 
   for (size_t pos = 0; pos < src.size(); pos = NextUtf8Pos(src, pos)) {
@@ -38,6 +38,9 @@ bool PairManager::Build(const string src, LM& lm) {
       if (lm.GetSpecialPair(UNK_STR, &unknown_pair)) {
 	return false;
       }
+      unknown_pair.src_str = src.substr(pos, next_pos - pos);
+      unknown_pair.dst_str = unknown_pair.dst_str;
+      
       pairs_[pos].push_back(unknown_pair);
     }
   }
@@ -50,8 +53,8 @@ bool PairManager::Build(const string src, LM& lm) {
   return true;
 }
 
-void PairManager::GetPairsAt(int pos, vector<Pair>* pairs) const {
-  pairs = &pairs_[pos];
+void PairManager::GetPairsAt(int pos, const vector<Pair>** pairs) const {
+  *pairs = &pairs_[pos];
 }
 
 }  // namespace NgramConverter

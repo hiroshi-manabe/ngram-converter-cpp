@@ -14,8 +14,8 @@ namespace NgramConverter {
 class LM;
 
 struct Pair {
-  Pair(string src_str, string dst_str, uint32_t token_id) :
-  src_str(src_str), dst_str(dst_str), token_id(token_id) {};
+  // Pair(string src_str, string dst_str, uint32_t token_id) :
+  //  src_str(src_str), dst_str(dst_str), token_id(token_id) {};
   string src_str;
   string dst_str;
   uint32_t token_id;
@@ -23,8 +23,8 @@ struct Pair {
 
 class PairManager {
  public:
-  bool Build(const string src, LM& lm);
-  void GetPairsAt(int pos, vector<Pair>* pairs) const;
+  bool Build(const string src, const LM& lm);
+  void GetPairsAt(int pos, const vector<Pair>** pairs) const;
 
  private:
   vector<vector<Pair> > pairs_;

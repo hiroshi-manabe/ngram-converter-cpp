@@ -1,3 +1,4 @@
+#include "converter.h"
 #include "lm.h"
 #include "pair.h"
 
@@ -102,4 +103,13 @@ TEST_F(LMTest, NgramTest) {
     EXPECT_TRUE(IsNear(ngram.score, expected_data[i].score));
     context_id = new_context_id;
   }
+}
+
+TEST_F(LMTest, ConvertTest) {
+  string src = "きょうはいいてんきですね。";
+  string dst;
+  string expected = "今日はいい天気ですね";
+  NgramConverter::Converter converter(&lm);
+  EXPECT_TRUE(converter.Convert(src, &dst));
+  EXPECT_EQ(dst, expected);
 }

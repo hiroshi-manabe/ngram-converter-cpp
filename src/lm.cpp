@@ -194,13 +194,13 @@ void LM::GetUnigram(int token_id, NgramData* ngram) const {
 }
 
 bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
-		  uint32_t* new_context_id, NgramData* ngram) const {
+		  uint32_t* new_context_id, NgramData* ngram_data) const {
   if (n == 0 || n > n_) {
     return false;
   }
 
   if (n == 1) {
-    GetUnigram(token_id, ngram);
+    GetUnigram(token_id, ngram_data);
     *new_context_id = token_id;
     return true;
   }
@@ -237,7 +237,7 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   for (int i = 0; block_num * BLOCK_SIZE + i < ngram_counts_[n]; ++i) {
     if (ngram_data_work_[i].token_id == token_id &&
 	ngram_data_work_[i].context_id == context_id) {
-      *ngram = ngram_data_work_[i];
+      *ngram_data = ngram_data_work_[i];
       *new_context_id = block_num * BLOCK_SIZE + i;
       return true;
     }
@@ -265,22 +265,22 @@ bool LM::GetTokenId(const string src, const string dst,
 }
 
 bool LM::GetSpecialPair(const string src, Pair* pair) const {
-  marisa::Agnet agent;
+  marisa::Agent agent;
   char buf[MAX_KEY_LEN];
 
-  if (src.size() > MAX_KEN_LEN) {
+  if (src.size() > MAX_KEY_LEN) {
     return false;
   }
 
   strcpy(buf, src.c_str());
-  agent_key.set_query(buf, src.size());
+  agent.set_query(buf, src.size());
 
   if (!trie_pair_.lookup(agent)) {
     return false;
   }
   pair->src_str = src;
   pair->dst_str = "";
-  token_id = agent.key().id();
+  pair->token_id = agent.key().id();
   return true;
 }
 
@@ -312,7 +312,13 @@ bool LM::GetPairs(const string src, vector<Pair>* results) const {
 
       string src = pair_str.substr(0, pos);
       string dst = pair_str.substr(pos + strlen(PAIR_SEPARATOR));
-      results->push_back(Pair(src, dst, token_id));
+
+      Pair pair;
+      pair.src_str = src;
+      pair.dst_str = dst;
+      pair.token_id = token_id;
+
+      results->push_back(pair);
     }
   }
   return true;

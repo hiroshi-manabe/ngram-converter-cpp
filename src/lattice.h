@@ -24,7 +24,7 @@ struct Node {
 
   int end_pos;
   uint32_t context_id;
-  size_t valid_n;
+  int valid_n;
   double node_score;
   double backoff;
   double path_score;
@@ -33,7 +33,7 @@ struct Node {
 class Lattice {
  public:
   bool AddNode(Node node);
-  bool GetEndNodesAt(int pos, const map<Node, Node>* nodes);
+  bool GetEndNodesAt(int pos, const map<Node, Node>** nodes);
 
  private:
   list<pair<map<Node, Node>, int> > end_nodes_;
