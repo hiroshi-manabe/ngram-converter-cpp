@@ -13,7 +13,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-#define PATH_TEST_FILES "../test_data/test"
+#define PATH_TEST_FILES "../dict/bccwj4_rev"
 #define TEST_MAX_N 4
 
 namespace {

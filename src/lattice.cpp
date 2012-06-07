@@ -7,6 +7,8 @@
 #include "lm.h"
 #include "pair.h"
 
+using std::cout;
+using std::endl;
 using std::stringstream;
 
 namespace NgramConverter {
@@ -88,10 +90,10 @@ bool Lattice::AddNode(Node node) {
   }
 
   if (it == map_to_add.end()) {
-    std::cout << node.d() << std::endl;
+    //    cout << node.d() << endl;
     map_to_add[node] = node;
   } else if (node.path_score > it->second.path_score) {
-    std::cout << node.d() << std::endl;
+    //    cout << node.d() << endl;
     const Node& old = it->second;
     node.node_score = old.node_score;
     node.backoff = old.backoff;

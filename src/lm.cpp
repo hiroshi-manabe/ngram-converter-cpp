@@ -272,7 +272,8 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
     return false;
   }
 
-  for (int i = 0; block_index * BLOCK_SIZE + i < ngram_counts_[n]; ++i) {
+  for (int i = 0; i < BLOCK_SIZE &&
+	 block_index * BLOCK_SIZE + i < ngram_counts_[n]; ++i) {
     if (ngram_data_work_[i].token_id == token_id &&
 	ngram_data_work_[i].context_id == context_id) {
       *ngram_data = ngram_data_work_[i];

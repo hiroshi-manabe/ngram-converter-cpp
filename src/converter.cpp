@@ -44,6 +44,7 @@ bool Converter::Convert(string src, string* dst) {
   if (!lm_->GetNgram(1, bos_pair.token_id, 0, &new_context_id, &ngram_data)) {
     return false;
   }
+  
   start_node.node_score = ngram_data.score;
   start_node.backoff = ngram_data.backoff;
   start_node.context_id = new_context_id;
