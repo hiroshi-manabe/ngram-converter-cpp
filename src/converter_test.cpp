@@ -96,7 +96,7 @@ TEST_F(LMTest, NgramTest) {
     uint32_t token_id;
     uint32_t new_context_id;
 
-    EXPECT_EQ(context_id, expected_data[i].context_id);
+    EXPECT_EQ(expected_data[i].context_id, context_id);
     EXPECT_TRUE(lm.GetTokenId(src_strs[i], dst_strs[i], &token_id));
     EXPECT_TRUE(lm.GetNgram(i+1, token_id, context_id, &new_context_id,
 			    &ngram));
@@ -108,8 +108,8 @@ TEST_F(LMTest, NgramTest) {
 TEST_F(LMTest, ConvertTest) {
   string src = "きょうはいいてんきですね。";
   string dst;
-  string expected = "今日はいい天気ですね";
+  string expected = "今日はいい天気ですね。";
   NgramConverter::Converter converter(&lm);
   EXPECT_TRUE(converter.Convert(src, &dst));
-  EXPECT_EQ(dst, expected);
+  EXPECT_EQ(expected, dst);
 }

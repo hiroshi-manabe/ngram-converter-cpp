@@ -1,9 +1,13 @@
 #include <algorithm>
+#include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 #include "lattice.h"
 #include "lm.h"
 #include "pair.h"
+
+using std::stringstream;
 
 namespace NgramConverter {
 
@@ -15,13 +19,17 @@ bool Node::operator<(const Node& another) const {
   int result;
 
   result = this->end_pos - another.end_pos;
-  if (result) {
-    return result;
+  if (result < 0) {
+    return true;
+  } else if (result > 0) {
+    return false;
   }
 
   result = (another.valid_n == 0) - (this->valid_n == 0);
-  if (result) {
-    return result;
+  if (result < 0) {
+    return true;
+  } else if (result > 0) {
+    return false;
   }
 
   const Node* this_left = this;
@@ -29,66 +37,72 @@ bool Node::operator<(const Node& another) const {
 
   for (int i = 0; i < std::min(this->valid_n, another.valid_n); ++i) {
     result = (this_left->GetTokenId() - another_left->GetTokenId());
-    if (result) {
-      return result;
+
+    if (result < 0) {
+      return true;
+    } else if (result > 0) {
+      return false;
     }
+
     this_left = this_left->left_node;
     another_left = another_left->left_node;
   }
-  return this->valid_n - another.valid_n;
+  result = this->valid_n - another.valid_n;
+  if (result < 0) {
+    return true;
+  }
+  return false;
+}
+
+string Node::d() const {
+  stringstream ss;
+  const Node* left = this;
+
+  for (int i = 0; i < valid_n; ++i) {
+    ss << "[" << left->pair->src_str << "/" << left->pair->dst_str << "("
+       << left->pair->token_id << ")]";
+    left = left->left_node;
+  }
+  ss << "(c:" << context_id << ",ns:" << node_score << ",b:" << backoff
+     << ",p:" << path_score << ")";
+  return ss.str();
+}
+
+Lattice::Lattice(size_t len) {
+  end_nodes_.resize(len + 1);
 }
 
 bool Lattice::AddNode(Node node) {
-  bool push_back_new = false;
-  int node_end_pos = 0;
-
-  if (!end_nodes_.empty()) {
-    int last_end_pos = end_nodes_.back().second;
-    int node_end_pos = node.end_pos;
-
-    if (last_end_pos > node_end_pos) {
-      return false;
-    } else if (last_end_pos < node_end_pos) {
-      push_back_new = true;
-    }
-  } else {  // end_nodes_ is empty
-    push_back_new = true;
-  }
-  if (push_back_new) {
-    map<Node, Node> last_map;
-    end_nodes_.push_back(pair<map<Node, Node>, int>(last_map, node_end_pos));
-  }
-
-  map<Node, Node>* last_map = &end_nodes_.back().first;
+  map<Node, Node>& map_to_add = end_nodes_[node.end_pos];
 
   map<Node, Node>::const_iterator it;
   if (node.backoff != INVALID_SCORE) {
-    it = last_map->find(node);
+    it = map_to_add.find(node);
   } else {
     for (; node.valid_n >= 0; --node.valid_n) {
-      it = last_map->find(node);
-      if (it != last_map->end()) {
+      it = map_to_add.find(node);
+      if (it != map_to_add.end()) {
 	break;
       }
     }
   }
 
-  if (it == last_map->end() || node.path_score > it->second.path_score) {
-    last_map->insert(pair<Node, Node>(node, node));
+  if (it == map_to_add.end()) {
+    std::cout << node.d() << std::endl;
+    map_to_add[node] = node;
+  } else if (node.path_score > it->second.path_score) {
+    std::cout << node.d() << std::endl;
+    const Node& old = it->second;
+    node.node_score = old.node_score;
+    node.backoff = old.backoff;
+    node.context_id = old.context_id;
+    map_to_add[node] = node;
   }
   return true;
 }
 
-bool Lattice::GetEndNodesAt(int pos, const map<Node, Node>** nodes) {
-  bool found = false;
-  for (list<pair<map<Node, Node>, int> >::const_reverse_iterator it
-	 = end_nodes_.rbegin(); it != end_nodes_.rend(); ++it) {
-    if (it->second == pos) {
-      found = true;
-      *nodes = &(it->first);
-    }
-  }
-  return found;
+void Lattice::GetEndNodesAt(int pos, const map<Node, Node>** nodes) {
+  *nodes = &end_nodes_[pos];
 }
 
 }  // namespace NgramConverter

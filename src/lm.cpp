@@ -69,6 +69,7 @@ bool DecodeBlock(const uint8_t* buf, size_t buf_size,
 	bit_offset++;
       }
       ngrams[i].token_id = ngrams[i-1].token_id + zero_count;
+      bit_offset++;
     }
     offset += int((bit_offset + 7) / 8);
   } else {  // flags & FLAGS_HAS_TOKEN_IDS
@@ -93,6 +94,46 @@ bool DecodeBlock(const uint8_t* buf, size_t buf_size,
   }
 
   return true;
+}
+
+void* MyBsearch(const void* key, const void* base, size_t num,
+		size_t size, int (*compare)(const void*, const void*)) {
+  size_t i0 = 0;
+  size_t i1 = num;
+  while (i0 < i1) {
+    int i = (i0 + i1) / 2;
+    int comp = compare(key, (char*)base + size * i);
+    if (!comp) {
+      i0 = i;
+      break;
+    } else if (comp < 0) {
+      i1 = i;
+    } else {
+      i0 = i+1;
+    }
+  }
+
+  if (i0 == i1 && i0 > 0) {
+    --i0;
+  }
+
+  return (char*)base + size * i0;
+}
+
+int CompareNgramIndices(const void* a, const void* b) {
+  const NgramConverter::NgramIndex& ref_a =
+    *(const NgramConverter::NgramIndex*)a;
+  const NgramConverter::NgramIndex& ref_b =
+    *(const NgramConverter::NgramIndex*)b;
+  int result;
+
+  result = ref_a.token_id - ref_b.token_id;
+  if (result) {
+    return result;
+  }
+
+  result = ref_a.context_id - ref_b.context_id;
+  return result;
 }
 
 }  // namespace
@@ -207,38 +248,35 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   // n > 1
   size_t block_count = BlockCount(ngram_counts_[n]);
 
-  size_t block_num;
-  for (block_num = 0; block_num < block_count; ++block_num) {
-    if (ngram_indices_[n][block_num].token_id < token_id) {
-      continue;
-    }
-    if (ngram_indices_[n][block_num].token_id > token_id ||
-	ngram_indices_[n][block_num].context_id > context_id) {
-      break;
-    }
-  }
-  if (block_num == 0) {
-    return false;
-  }
+  NgramIndex key = {
+    token_id,
+    context_id,
+    0
+  };
+  const NgramIndex* result;
 
-  --block_num;
-  size_t data_start = block_num > 0 ?
-    ngram_indices_[n][block_num-1].data_offset
+  result = (const NgramIndex*)MyBsearch(&key, ngram_indices_[n].get(),
+					block_count, sizeof(NgramIndex),
+					CompareNgramIndices);
+
+  size_t block_index = result - ngram_indices_[n].get();
+  size_t data_start = block_index > 0 ?
+    ngram_indices_[n][block_index-1].data_offset
     : 0;
-  size_t data_end = ngram_indices_[n][block_num].data_offset;
+  size_t data_end = result->data_offset;
   
   if (!DecodeBlock(ngram_data_.get() + data_start, data_end - data_start,
-		   ngram_indices_[n][block_num].token_id,
-		   ngram_indices_[n][block_num].context_id,
+		   result->token_id,
+		   result->context_id,
 		   ngram_data_work_)) {
     return false;
   }
 
-  for (int i = 0; block_num * BLOCK_SIZE + i < ngram_counts_[n]; ++i) {
+  for (int i = 0; block_index * BLOCK_SIZE + i < ngram_counts_[n]; ++i) {
     if (ngram_data_work_[i].token_id == token_id &&
 	ngram_data_work_[i].context_id == context_id) {
       *ngram_data = ngram_data_work_[i];
-      *new_context_id = block_num * BLOCK_SIZE + i;
+      *new_context_id = block_index * BLOCK_SIZE + i;
       return true;
     }
   }
@@ -250,10 +288,15 @@ bool LM::GetTokenId(const string src, const string dst,
   marisa::Agent agent;
   
   char key[MAX_KEY_LEN+1];
-  if (src.size() + strlen(PAIR_SEPARATOR) + dst.size() > MAX_KEY_LEN) {
+  string str_key = src;
+  if (!dst.empty()) {
+    str_key += PAIR_SEPARATOR;
+    str_key += dst;
+  }
+  if (str_key.size() > MAX_KEY_LEN) {
     return false;
   }
-  strcpy(key, (src + PAIR_SEPARATOR + dst).c_str());
+  strcpy(key, str_key.c_str());
   agent.set_query(key);
 
   if (!trie_pair_.lookup(agent)) {
@@ -261,26 +304,6 @@ bool LM::GetTokenId(const string src, const string dst,
   }
 
   *token_id = agent.key().id();
-  return true;
-}
-
-bool LM::GetSpecialPair(const string src, Pair* pair) const {
-  marisa::Agent agent;
-  char buf[MAX_KEY_LEN];
-
-  if (src.size() > MAX_KEY_LEN) {
-    return false;
-  }
-
-  strcpy(buf, src.c_str());
-  agent.set_query(buf, src.size());
-
-  if (!trie_pair_.lookup(agent)) {
-    return false;
-  }
-  pair->src_str = src;
-  pair->dst_str = "";
-  pair->token_id = agent.key().id();
   return true;
 }
 

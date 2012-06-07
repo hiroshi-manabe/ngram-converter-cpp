@@ -1,10 +1,9 @@
-#include "converter.h"
-
-#include "lm.h"
-#include "lattice.h"
-
 #include <list>
 #include <vector>
+
+#include "converter.h"
+#include "lm.h"
+#include "lattice.h"
 
 using std::list;
 using std::vector;
@@ -16,35 +15,61 @@ Converter::Converter(LM* lm) {
 }
 
 bool Converter::Convert(string src, string* dst) {
-  Lattice lattice;
+  Lattice lattice(src.size() + 1);
   PairManager pair_manager;
-  pair_manager.Build(src, *lm_);
-  Pair start_pair;
-  lm_->GetSpecialPair(BOS_STR, &start_pair);
+  if (!pair_manager.Build(src, *lm_)) {
+    return false;
+  }
+  Pair bos_pair;
+  uint32_t bos_token_id;
+  if (!lm_->GetTokenId(BOS_STR, "", &bos_token_id)) {
+    return false;
+  }
+  bos_pair.token_id = bos_token_id;
+  bos_pair.src_str = bos_pair.dst_str = "";
+
+  vector<map<Node, Node> > node_cache;
+  node_cache.resize(src.size() + 2);  // the end pos of EOS is size+1
 
   Node start_node;
-  start_node.pair = &start_pair;
+  start_node.pair = &bos_pair;
   start_node.left_node = NULL;
   start_node.end_pos = 0;
   start_node.context_id = 0;
   start_node.valid_n = 1;
+  start_node.path_score = 0;
 
   uint32_t new_context_id;
   NgramData ngram_data;
-  if (!lm_->GetNgram(1, start_pair.token_id, 0, &new_context_id, &ngram_data)) {
+  if (!lm_->GetNgram(1, bos_pair.token_id, 0, &new_context_id, &ngram_data)) {
     return false;
   }
   start_node.node_score = ngram_data.score;
   start_node.backoff = ngram_data.backoff;
   start_node.context_id = new_context_id;
 
-  lattice.AddNode(start_node);
- 
-  map<Node, Node> node_cache;
+  if (!lattice.AddNode(start_node)) {
+    return false;
+  }
+  node_cache[0].insert(pair<Node, Node>(start_node, start_node));
 
-  for (size_t pos = 0; pos < src.size() + 1; ++pos) {
+  for (size_t pos = 0; pos <= src.size(); ++pos) {
     const vector<Pair>* pairs;
     pair_manager.GetPairsAt(pos, &pairs);
+
+    if (pairs->size()) {
+      Node zero_length_node;
+      zero_length_node.end_pos = pos;
+      zero_length_node.valid_n = 0;
+      zero_length_node.backoff = 0;
+      zero_length_node.path_score = INVALID_SCORE;
+      if (!lattice.AddNode(zero_length_node)) {
+	return false;
+      }
+      node_cache[pos].insert(pair<Node, Node>(zero_length_node, zero_length_node));
+    } else {
+      continue;
+    }
 
     for (vector<Pair>::const_iterator it_right = pairs->begin();
 	 it_right != pairs->end(); ++it_right) {
@@ -52,13 +77,11 @@ bool Converter::Convert(string src, string* dst) {
       int right_pos = pos + right.src_str.size();
       const map<Node, Node>* nodes;
 
-      if (!lattice.GetEndNodesAt(pos, &nodes)) {
-	return false;
-      }
+      lattice.GetEndNodesAt(pos, &nodes);
 
       for (map<Node, Node>::const_iterator it_left = nodes->begin();
 	   it_left != nodes->end(); ++it_left) {
-	const Node& left = it_left->first;
+	const Node& left = it_left->second;
 	NgramData ngram_data;
 	Node new_node;
 	new_node.pair = &right;
@@ -72,15 +95,17 @@ bool Converter::Convert(string src, string* dst) {
 	  new_node.node_score = ngram_data.score;
 	  new_node.backoff = ngram_data.backoff;
 	  new_node.path_score = left.path_score + ngram_data.score;
-	  node_cache.insert(pair<Node, Node>(new_node, new_node));
+	  node_cache[new_node.end_pos].insert(pair<Node, Node>(new_node,
+							       new_node));
 	} else {
 	  new_node.path_score = left.path_score;
-	  for (size_t n = left.valid_n; n >= 0; --n) {
+	  for (int n = left.valid_n; n >= 0; --n) {
 	    Node backoff_node = left;
 	    backoff_node.valid_n = n;
 	    map<Node, Node>::const_iterator it;
-	    it = node_cache.find(backoff_node);
-	    if (it != node_cache.end() && it->second.backoff != INVALID_SCORE) {
+	    it = node_cache[pos].find(backoff_node);
+	    if (it != node_cache[pos].end() &&
+		it->second.backoff != INVALID_SCORE) {
 	      new_node.path_score += it->second.backoff;
 	    }
 
@@ -89,32 +114,33 @@ bool Converter::Convert(string src, string* dst) {
 	    temp_node.left_node = &left;
 	    temp_node.end_pos = right_pos;
 	    temp_node.valid_n = n;
-	    it = node_cache.find(temp_node);
-	    if (it != node_cache.end()) {
+	    it = node_cache[temp_node.end_pos].find(temp_node);
+	    if (it != node_cache[temp_node.end_pos].end()) {
 	      new_node.valid_n = n;
 	      new_node.node_score = it->second.node_score;
 	      new_node.backoff = it->second.backoff;
 	      new_node.context_id = it->second.context_id;
 	      new_node.path_score += it->second.node_score;
+	      break;
 	    }
 	  }
 	}
-
-	lattice.AddNode(new_node);
+	if (!lattice.AddNode(new_node)) {
+	  return false;
+	}
       }
     }
   }
 
   const map<Node, Node>* end_nodes;
-  if (!lattice.GetEndNodesAt(src.size(), &end_nodes)) {
-    return false;
-  }
+  lattice.GetEndNodesAt(src.size() + 1, &end_nodes);
 
-  const Node* end_node;
+  const Node* end_node = NULL;
   for (map<Node, Node>::const_iterator it = end_nodes->begin();
        it != end_nodes->end(); ++it) {
-    end_node = &(it->second);
-    break;  // There is only one end node
+    if (!end_node || it->second.path_score > end_node->path_score) {
+      end_node = &(it->second);
+    }
   }
 
   list<const Node*> best_path;

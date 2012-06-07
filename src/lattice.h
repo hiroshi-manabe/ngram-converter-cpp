@@ -1,15 +1,15 @@
 #ifndef NGRAM_CONVERTER_LATTICE_H_INCLUDED_
 #define NGRAM_CONVERTER_LATTICE_H_INCLUDED_
 
-#include <list>
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 using std::string;
-using std::list;
 using std::map;
 using std::pair;
+using std::vector;
 
 namespace NgramConverter {
 
@@ -28,15 +28,18 @@ struct Node {
   double node_score;
   double backoff;
   double path_score;
+
+  string d() const;
 };
 
 class Lattice {
  public:
+  Lattice(size_t len);
   bool AddNode(Node node);
-  bool GetEndNodesAt(int pos, const map<Node, Node>** nodes);
+  void GetEndNodesAt(int pos, const map<Node, Node>** nodes);
 
  private:
-  list<pair<map<Node, Node>, int> > end_nodes_;
+  vector<map<Node, Node> > end_nodes_;
 };
 
 }  // namespace NgramConverter

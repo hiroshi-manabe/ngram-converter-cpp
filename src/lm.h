@@ -68,7 +68,6 @@ class LM {
 		uint32_t* new_context_id,
 		NgramData* ngram_data) const;
   bool GetTokenId(const string src, const string dst, uint32_t* token_id) const;
-  bool GetSpecialPair(const string src, Pair* pair) const;
   bool GetPairs(const string src, vector<Pair>* results) const;
 
  private:

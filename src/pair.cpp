@@ -25,7 +25,7 @@ bool PairManager::Build(const string src, const LM& lm) {
   for (size_t pos = 0; pos < src.size(); pos = NextUtf8Pos(src, pos)) {
     vector<Pair> results;
 
-    if (!lm.GetPairs(src, &results)) {
+    if (!lm.GetPairs(src.substr(pos), &results)) {
       return false;
     }
     for (vector<Pair>::const_iterator it = results.begin();
@@ -35,20 +35,26 @@ bool PairManager::Build(const string src, const LM& lm) {
     if (results.size() == 0) {
       size_t next_pos = NextUtf8Pos(src, pos);
       Pair unknown_pair;
-      if (lm.GetSpecialPair(UNK_STR, &unknown_pair)) {
+      uint32_t unk_token_id;
+      if (!lm.GetTokenId(UNK_STR, "", &unk_token_id)) {
 	return false;
       }
       unknown_pair.src_str = src.substr(pos, next_pos - pos);
-      unknown_pair.dst_str = unknown_pair.dst_str;
+      unknown_pair.dst_str = unknown_pair.src_str;
+      unknown_pair.token_id = unk_token_id;
       
       pairs_[pos].push_back(unknown_pair);
     }
   }
 
   Pair eos_pair;
-  if (lm.GetSpecialPair(EOS_STR, &eos_pair)) {
+  uint32_t eos_token_id;
+  if (!lm.GetTokenId(EOS_STR, "", &eos_token_id)) {
     return false;
   }
+  eos_pair.token_id = eos_token_id;
+  eos_pair.src_str = " ";
+  eos_pair.dst_str = "";
   pairs_[src.size()].push_back(eos_pair);
   return true;
 }
