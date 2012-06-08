@@ -15,6 +15,10 @@ FLAGS_HAS_BACKOFF = 2
 
 EXT_INDEX = '.index'
 EXT_DATA = '.data'
+ExT_FILTER = '.filter'
+
+FILTER_COUNT = 7
+FILTER_BITS_PER_ELEM = 10
 
 def Usage():
     print sys.argv[0] + ' - generate N-gram data from a sorted N-gram file.'
@@ -57,7 +61,7 @@ class BitArray(object):
             raise ValueError
 
         self._bytearray = bytearray(b_array)
-        self._length = length
+       self._length = length
 
 
 def EncodeNumber(x):
@@ -327,8 +331,17 @@ def main():
         data = ngram_block.FlushData()
         f_out_data.write(data)
 
-        f_out_index.write(struct.pack('=LLL', first_token_id,
-                                      first_context_id, f_out_data.tell()))
+        if data:
+            f_out_index.write(struct.pack('=LLL', first_token_id,
+                                          first_context_id, f_out_data.tell()))
+
+    def hash_func(src, num, size):
+        src ^= 0x5555555555555555
+        mask = (1 << num) - 1
+        low = num & mask
+        src >> num
+        src |= low << (64 - num)
+        return src
         
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hi:o:s:v:')
@@ -372,11 +385,13 @@ def main():
     f_in = open(input_filename, 'r')
     f_out_index = open(output_filename_prefix + EXT_INDEX, 'wb')
     f_out_data = open(output_filename_prefix + EXT_DATA, 'wb')
+    f_out_filter = open(output_filename_prefix + EXT_FILTER, 'wb')
 
     cur_n = 0
     cur_ngram_count = 0
     ngram_block = NgramBlock(BLOCK_SIZE)
-    was_full = False
+    filter_block = None
+    bit_count = None
 
     for line in f_in:
         line = line.rstrip('\n')
@@ -388,6 +403,7 @@ def main():
         if fields[0][0] == '#':
             if cur_n > 1:
                 output_data(f_out_index, f_out_data, ngram_block)
+                f_out_filter.write(filter_block)
 
             new_n = int(fields[0][1:])
             if new_n != cur_n + 1:
@@ -395,6 +411,11 @@ def main():
 
             cur_n = new_n
             cur_ngram_count = int(fields[1])
+            bit_count = cur_ngram_count * FILTER_BITS_PER_ELEM
+
+            if cur_n > 1:
+                filter_block = bytearray(int((bit_count + 7) / 8))
+
             print 'Processing %d-gram...' % cur_n
 
             f_out_index.write(struct.pack('=L', cur_ngram_count))
@@ -430,13 +451,23 @@ def main():
         else: # cur_n != 1
             is_full = ngram_block.AddNgram(token_id, context_id,
                                            score_int, backoff_int)
+
+            for i in range(FILTER_COUNT):
+                bit_pos = hash_func((token_id << 32) + context_id,
+                                    i,
+                                    bit_count)
+                filter_block[bit_pos % 8] &= (1 << (bit_pos % 8))
+
             if is_full:
                 output_data(f_out_index, f_out_data, ngram_block)
 
     output_data(f_out_index, f_out_data, ngram_block)
+    f_out_filter.write(filter_block)
+
     f_in.close()
     f_out_index.close()
     f_out_data.close()
+    f_out_filter.close()
     print 'Done.'
 
     if verification_filename:

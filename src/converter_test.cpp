@@ -106,7 +106,8 @@ TEST_F(LMTest, NgramTest) {
 }
 
 TEST_F(LMTest, ConvertTest) {
-  string src = "きょうはいいてんきですね。";
+  //  string src = "きょうはいいてんきですね。";
+  string src = "にほんせいふも「きたちょうせんがかくかいはつをすすめているうたがいはのうこう」（がいむしょうすじ）とし、べいかんなどときょうちょうしてこくれんあんぜんほしょうりじかいをつうじたせいさいきょうぎにふみきった。";
   string dst;
   string expected = "今日はいい天気ですね。";
   NgramConverter::Converter converter(&lm);

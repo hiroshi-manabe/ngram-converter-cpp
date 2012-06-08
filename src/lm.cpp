@@ -310,16 +310,14 @@ bool LM::GetTokenId(const string src, const string dst,
 
 bool LM::GetPairs(const string src, vector<Pair>* results) const {
   marisa::Agent agent_key;
-  if (src.size() + strlen(PAIR_SEPARATOR) > MAX_KEY_LEN) {
-    return false;
-  }
   char buf[MAX_KEY_LEN+1];
-  strcpy(buf, src.c_str());
+
+  strncpy(buf, src.c_str(), MAX_KEY_LEN);
   agent_key.set_query(buf, src.size());
 
   while (trie_key_.common_prefix_search(agent_key)) {
     marisa::Agent agent_pair;
-    char buf2[MAX_KEY_LEN+1];
+    char buf2[MAX_KEY_LEN+2];
     string key_str(agent_key.key().ptr(), agent_key.key().length());
     key_str += PAIR_SEPARATOR;
     strcpy(buf2, key_str.c_str());
