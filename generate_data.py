@@ -15,7 +15,7 @@ FLAGS_HAS_BACKOFF = 2
 
 EXT_INDEX = '.index'
 EXT_DATA = '.data'
-ExT_FILTER = '.filter'
+EXT_FILTER = '.filter'
 
 FILTER_COUNT = 7
 FILTER_BITS_PER_ELEM = 10
@@ -61,7 +61,7 @@ class BitArray(object):
             raise ValueError
 
         self._bytearray = bytearray(b_array)
-       self._length = length
+        self._length = length
 
 
 def EncodeNumber(x):
@@ -341,7 +341,7 @@ def main():
         low = num & mask
         src >> num
         src |= low << (64 - num)
-        return src
+        return src % size
         
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hi:o:s:v:')
@@ -456,7 +456,7 @@ def main():
                 bit_pos = hash_func((token_id << 32) + context_id,
                                     i,
                                     bit_count)
-                filter_block[bit_pos % 8] &= (1 << (bit_pos % 8))
+                filter_block[int(bit_pos / 8)] |= (1 << (bit_pos % 8))
 
             if is_full:
                 output_data(f_out_index, f_out_data, ngram_block)
