@@ -339,7 +339,7 @@ def main():
         src ^= 0x5555555555555555
         mask = (1 << num) - 1
         low = num & mask
-        src >> num
+        src >>= num
         src |= low << (64 - num)
         return src % size
         
