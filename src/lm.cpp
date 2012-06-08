@@ -136,6 +136,24 @@ int CompareNgramIndices(const void* a, const void* b) {
   return result;
 }
 
+inline size_t HashFunc(uint64_t src, int num, size_t buf_size) {
+  src ^= 0x5555555555555555L;
+  uint64_t low = src & ((1 << num) - 1);
+  src >>= num;
+  src |= low << (64 - num);
+  return src % buf_size;
+}
+
+inline bool CheckExistence(uint64_t id, uint8_t* buf, size_t buf_size) {
+  for (int i = 0; i < FILTER_COUNT; ++i) {
+    size_t index = HashFunc(id, num, buf_size);
+    if (buf[bit_pos / 8] & (1 << (bit_pos % 8)) == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace
 
 namespace NgramConverter {
@@ -167,6 +185,7 @@ bool LM::LoadNgrams(const string filename_prefix) {
   
   FILE* fp_index = fopen((filename_prefix + EXT_INDEX).c_str(), "rb");
   FILE* fp_data = fopen((filename_prefix + EXT_DATA).c_str(), "rb");
+  FILE* fp_filter = fopen((filename_prefix + EXT_FILTER).c_str(), "rb");
 
   if (fseek(fp_data, 0, SEEK_END) != 0) {
     goto LOAD_NGRAMS_END;
@@ -216,6 +235,14 @@ bool LM::LoadNgrams(const string filename_prefix) {
       goto LOAD_NGRAMS_END;
     }
     ngram_counts_[cur_n] = ngram_count;
+
+    size_t filter_size_in_bits = (ngram_count * FILTER_BITS_PER_ELEM);
+    size_t filter_size = (filter_size_in_bits + 7) / 8;
+    filters_[cur_n].reset(new uint8_t[filter_size]);
+    size_read = fread(filters_[cur_n].get(), 1, filter_size, fp_filter);
+    if (size_read < filter_size) {
+      goto LOAD_NGRAM_END;
+    }
   }
   n_ = cur_n;
   is_success = true;
@@ -245,7 +272,13 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
     *new_context_id = token_id;
     return true;
   }
+
   // n > 1
+  uint64_t id = token_id << 32 | context_id;
+  if (!CheckExistence(id, filters_[n].get(), ngram_counts_[n])) {
+    return false;
+  }
+
   size_t block_count = BlockCount(ngram_counts_[n]);
 
   NgramIndex key = {

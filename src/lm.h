@@ -38,6 +38,10 @@ using marisa::scoped_array;
 #define EXT_PAIR ".pair"
 #define EXT_INDEX ".index"
 #define EXT_DATA ".data"
+#define EXT_FILTER ".filter"
+
+#define FILTER_COUNT 7
+#define FILTER_BITS_PER_ELEM 10
 
 namespace NgramConverter {
 
@@ -77,6 +81,7 @@ class LM {
   scoped_array<uint8_t> ngram_data_;
   scoped_array<UnigramIndex> unigrams_;
   scoped_array<NgramIndex> ngram_indices_[MAX_N];
+  scoped_array<uint8_t> filters_[MAX_N];
   size_t ngram_counts_[MAX_N];
   mutable NgramData ngram_data_work_[BLOCK_SIZE];
   int n_;
