@@ -1,7 +1,14 @@
+#include "converter.h"
 #include "lm.h"
 
+#include <iostream>
+
+using std::cin;
+using std::cout;
+using std::endl;
+
 void Usage() {
-  printf("Usage: converter_main -i <input filename prefix>");
+  printf("Usage: converter_main -i <input filename prefix>\n");
   exit(0);
 }
 
@@ -21,6 +28,18 @@ int main(int argc, char* argv[]) {
 
   NgramConverter::LM lm;
   lm.LoadDics(input_filename_prefix);
+  NgramConverter::Converter converter(&lm);
+
+  string src;
+  string dst;
+
+  while (cin >> src) {
+    if (!converter.Convert(src, &dst)) {
+      cout << "An error occured." << endl;
+      break;
+    }
+    cout << dst << endl;
+  }
 
   return 0;
 }
