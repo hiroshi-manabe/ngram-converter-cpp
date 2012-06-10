@@ -451,9 +451,6 @@ def main():
             is_full = ngram_block.AddNgram(token_id, context_id,
                                            score_int, backoff_int)
 
-            if token_id == 1110 and context_id == 29315:
-                pass
-
             for i in range(FILTER_COUNT):
                 bit_pos = hash_func((token_id << 32) + context_id,
                                     i,
