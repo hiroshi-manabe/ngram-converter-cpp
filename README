@@ -1,0 +1,24 @@
+ngram-converter-cpp
+
+A simple N-gram Kana-Kanji/Kanji-Kana converter (C++ version).
+
+The attached dictionary files are converted from the files that can be downloaded at http://plata.ar.media.kyoto-u.ac.jp/gologo/lm.html .
+
+You will need "marisa-trie" module to use this software.
+
+
+You can test the conversion program in the following way:
+
+1. Make the target.
+> make
+
+2. Run the program with the attached dictionary.
+
+From Kana to Kanji:
+> ./converter-main -i dict/bccwj4_rev
+
+From Kanji to Kana:
+> ./converter-main -i dict/bccwj4
+
+
+To build a dictionary from SRILM format N-gram file, run sort-ngram.py and generate-data.py in this order.
