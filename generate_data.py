@@ -23,9 +23,9 @@ FILTER_BITS_PER_ELEM = 10
 def Usage():
     print sys.argv[0] + ' - generate N-gram data from a sorted N-gram file.'
     print 'Usage: '  + sys.argv[0] + \
-        '(-i <input filename>|-v <verification filename) ' + \
-        '-o <output filename prefix> ' + \
-        '-s <min score> '
+        ' (-i <input filename>|-v <verification filename)' + \
+        ' -o <output filename prefix>' + \
+        ' -s <min score>'
     sys.exit()
 
 
@@ -337,8 +337,7 @@ def main():
 
     def hash_func(src, num, size):
         src ^= 0x5555555555555555
-        mask = (1 << num) - 1
-        low = num & mask
+        low = src & ((1 << num) - 1)
         src >>= num
         src |= low << (64 - num)
         return src % size
@@ -451,6 +450,9 @@ def main():
         else: # cur_n != 1
             is_full = ngram_block.AddNgram(token_id, context_id,
                                            score_int, backoff_int)
+
+            if token_id == 1110 and context_id == 29315:
+                pass
 
             for i in range(FILTER_COUNT):
                 bit_pos = hash_func((token_id << 32) + context_id,

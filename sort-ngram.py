@@ -19,8 +19,8 @@ PAIR_SEPARATOR = '/'
 def Usage():
     print sys.argv[0] + ' - sort SRILM format ngram file.'
     print 'Usage: '  + sys.argv[0] + \
-        '-i <input filename> ' + \
-        '-o <output filename prefix> '
+        ' -i <input filename>' + \
+        ' -o <output filename prefix> '
     sys.exit()
 
 def to_id(trie, agent, query_key):

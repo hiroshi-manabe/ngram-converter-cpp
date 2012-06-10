@@ -146,8 +146,8 @@ inline size_t HashFunc(uint64_t src, int num, size_t buf_size) {
 
 inline bool CheckExistence(uint64_t id, uint8_t* buf, size_t buf_size) {
   for (int i = 0; i < FILTER_COUNT; ++i) {
-    size_t index = HashFunc(id, num, buf_size);
-    if (buf[bit_pos / 8] & (1 << (bit_pos % 8)) == 0) {
+    size_t index = HashFunc(id, i, buf_size);
+    if ((buf[index / 8] & (1 << (index % 8))) == 0) {
       return false;
     }
   }
@@ -241,7 +241,7 @@ bool LM::LoadNgrams(const string filename_prefix) {
     filters_[cur_n].reset(new uint8_t[filter_size]);
     size_read = fread(filters_[cur_n].get(), 1, filter_size, fp_filter);
     if (size_read < filter_size) {
-      goto LOAD_NGRAM_END;
+      goto LOAD_NGRAMS_END;
     }
   }
   n_ = cur_n;
@@ -274,8 +274,9 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   }
 
   // n > 1
-  uint64_t id = token_id << 32 | context_id;
-  if (!CheckExistence(id, filters_[n].get(), ngram_counts_[n])) {
+  uint64_t id = (uint64_t)token_id << 32 | context_id;
+  if (!CheckExistence(id, filters_[n].get(),
+		      ngram_counts_[n] * FILTER_BITS_PER_ELEM)) {
     return false;
   }
 

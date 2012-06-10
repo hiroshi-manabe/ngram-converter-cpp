@@ -13,7 +13,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-#define PATH_TEST_FILES "../dict/bccwj4_rev"
+#define PATH_TEST_FILES "../test_data/test"
 #define TEST_MAX_N 4
 
 namespace {
@@ -106,8 +106,7 @@ TEST_F(LMTest, NgramTest) {
 }
 
 TEST_F(LMTest, ConvertTest) {
-  //  string src = "きょうはいいてんきですね。";
-  string src = "にほんせいふも「きたちょうせんがかくかいはつをすすめているうたがいはのうこう」（がいむしょうすじ）とし、べいかんなどときょうちょうしてこくれんあんぜんほしょうりじかいをつうじたせいさいきょうぎにふみきった。";
+  string src = "きょうはいいてんきですね。";
   string dst;
   string expected = "今日はいい天気ですね。";
   NgramConverter::Converter converter(&lm);
