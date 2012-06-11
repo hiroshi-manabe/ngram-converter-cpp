@@ -33,7 +33,7 @@ $(TEST_CMD): $(OBJS) $(TEST_OBJ)
 clean:
 	rm -f $(OBJS) $(MAIN_OBJ) $(TEST_OBJ)
 	for d in $(sort $(dir $(OBJS) $(MAIN_OBJ) $(TEST_OBJ))); do \
-		if [ -d $$d ]; then rmdir -p --ignore-fail-on-non-empty $$d; fi \
+		if [ -d $$d ]; then rmdir -p $$d || echo "Skipping non-empty directory"; fi \
 	done
 	rm -f $(MAIN_CMD) $(TEST_CMD)
 
