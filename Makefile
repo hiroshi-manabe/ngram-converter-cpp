@@ -1,30 +1,45 @@
-CC=g++
-RM=rm
-OBJS=lattice.o pair.o lm.o converter.o
-MAIN_OBJ=converter_main.o
-TEST_OBJ=converter_test.o
-LIBS=-lmarisa
-LIBS_TEST=-lgtest -lgtest_main
+CXX		?= g++
 
-VPATH=src
+OBJS		:= obj/lattice.o obj/pair.o obj/lm.o obj/converter.o
+MAIN_OBJ	:= obj/converter_main.o
+TEST_OBJ	:= obj/converter_test.o
 
-converter-main: $(OBJS) $(MAIN_OBJ)
-	$(CC) -o $@ $(OBJS) $(MAIN_OBJ) $(LIBS)
+MAIN_CMD	:= converter-main
+TEST_CMD	:= test
 
-test: $(OBJS) $(TEST_OBJ)
-	$(CC) -o $@ $(OBJS) $(TEST_OBJ) $(LIBS) $(LIBS_TEST)
-	./test
+CXXFLAGS	?= -Wall -O2
+CPPFLAGS	+= $(shell pkg-config --cflags marisa)
+LDFLAGS		+= $(shell pkg-config --libs marisa)
+CPPFLAGS_TEST	:= -I/usr/local/include
+LDFLAGS_TEST	:= -L/usr/local/lib -lgtest -lgtest_main
 
-.PHONY:clean
+# 「*_TEST」については、出来れば「pkg-config」で処理した方が良いです。
+
+VPATH		:= src
+
+obj/%.o : %.cpp
+	@mkdir -p $(@D)
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $(CPPFLAGS_TEST) $< -o $@
+
+$(MAIN_CMD): $(OBJS) $(MAIN_OBJ)
+	$(CXX) $^ $(LDFLAGS) -o $@
+
+$(TEST_CMD): $(OBJS) $(TEST_OBJ)
+	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_TEST) -o $@
+	./$(TEST_CMD)
+
+.PHONY: clean
+
 clean:
-	$(RM) *.o
+	rm -f $(OBJS) $(MAIN_OBJ) $(TEST_OBJ)
+	for d in $(sort $(dir $(OBJS) $(MAIN_OBJ) $(TEST_OBJ))); do \
+		if [ -d $$d ]; then rmdir -p --ignore-fail-on-non-empty $$d; fi \
+	done
+	rm -f $(MAIN_CMD) $(TEST_CMD)
 
-.cpp.o:
-	$(CC) -c $< $(LIBS)
-
-converter.o: converter.h lm.h pair.h lattice.h
-converter_main.o: converter.h lm.h pair.h
-converter_test.o: converter.h lm.h pair.h
-lattice.o: lattice.h lm.h pair.h
-lm.o: lm.h pair.h
-pair.o: lm.h pair.h
+obj/converter.o: converter.h lm.h pair.h lattice.h
+obj/converter_main.o: converter.h lm.h pair.h
+obj/converter_test.o: converter.h lm.h pair.h
+obj/lattice.o: lattice.h lm.h pair.h
+obj/lm.o: lm.h pair.h
+obj/pair.o: lm.h pair.h
