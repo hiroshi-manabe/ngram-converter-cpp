@@ -13,7 +13,7 @@ using std::vector;
 
 namespace NgramConverter {
 
-class Pair;
+struct Pair;
 
 struct Node {
   uint32_t GetTokenId() const;
