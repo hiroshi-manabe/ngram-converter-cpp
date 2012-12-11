@@ -130,7 +130,9 @@ def main():
             k = fields[1].encode('utf-8')
             keyset_pair.push_back(k)
             pair = k.split(PAIR_SEPARATOR, 1);
-            keyset_key.push_back(pair[0])
+            if len(pair) > 1:
+                keyset_key.push_back(pair[0])
+
             pair_dict[k] = (float(fields[0]), float(fields[2]), fields[1])
         else:
             ngram = [to_id(trie_pair, agent, x.encode('utf-8')) for x
