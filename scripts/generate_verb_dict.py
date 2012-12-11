@@ -22,18 +22,20 @@ POTENTIAL_MASK = 0x40000000
 def Usage():
     print sys.argv[0] + ' - generate a verb dictionary.'
     print 'Usage: '  + sys.argv[0] + \
-        ' -d <dictionary filename prefix> '
+        ' -d <dictionary filename prefix> ' \
         ' -v <verb list filename> '
     sys.exit()
 
 def to_id(trie, agent, query_key):
     agent.set_query(query_key)
-    trie.lookup(agent)
+    if not trie.lookup(agent):
+        raise KeyError
+
     return agent.key_id()
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hi:v:')
+        opts, args = getopt.getopt(sys.argv[1:], 'hd:v:')
     except getopt.GetoptError:
         Usage()
         sys.exit(2)
@@ -72,20 +74,20 @@ def main():
             is_potential = True
             
         field_ids = [to_id(trie_pair, agent, x.encode('utf-8')) for x
-                     in fields]
-        if potential_mask:
+                     in fields[1:]]
+        if is_potential:
             field_ids[1] |= POTENTIAL_MASK
 
-        key_id_dict.get(fields[0], []).append(tuple(fields_ids))
+        key_id_dict.setdefault(fields[0], []).append(tuple(field_ids))
         keyset.push_back(fields[0].encode('utf-8'))
         
     trie_verb = marisa.Trie()
     trie_verb.build(keyset)
     trie_verb.save(dictionary_filename_prefix + EXT_VERB_KEY)
 
-    num_keys = trie_verb.num_key()
+    num_keys = trie_verb.num_keys()
     f_out = open(dictionary_filename_prefix + EXT_VERB_DATA, 'wb')
-    f_out.write(struct.pack('=L'), num_keys)
+    f_out.write(struct.pack('=L', num_keys))
 
     pos = 1 + num_keys
     size = 4 # sizeof(long)
@@ -93,7 +95,8 @@ def main():
     for i in range(num_keys):
         f_out.write(struct.pack('=L', pos * size))
         agent.set_query(i)
-        key = trie_verb.reverse_lookup(agent)
+        trie_verb.reverse_lookup(agent)
+        key = agent.key_str().decode('utf-8')
         for id in key_id_dict[key]:
             pos += 2
 
