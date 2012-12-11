@@ -95,19 +95,15 @@ def main():
     for i in range(num_keys):
         f_out.write(struct.pack('=L', pos * size))
         agent.set_query(i)
-
-        if not trie_verb.reverse_lookup(agent):
-            raise KeyError
-
+        trie_verb.reverse_lookup(agent):
         key = agent.key_str().decode('utf-8')
+
         for id in key_id_dict[key]:
             pos += 2
 
     for i in range(num_keys):
         agent.set_query(i)
-        if not trie_verb.reverse_lookup(agent):
-            raise KeyError
-
+        trie_verb.reverse_lookup(agent):
         key = agent.key_str().decode('utf-8')
         for id in key_id_dict[key]:
             f_out.write(struct.pack('=LL', id[0], id[1]))
