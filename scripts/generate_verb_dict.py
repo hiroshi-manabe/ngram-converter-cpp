@@ -95,7 +95,7 @@ def main():
     for i in range(num_keys):
         f_out.write(struct.pack('=L', pos * size))
         agent.set_query(i)
-        trie_verb.reverse_lookup(agent):
+        trie_verb.reverse_lookup(agent)
         key = agent.key_str().decode('utf-8')
 
         for id in key_id_dict[key]:
@@ -103,13 +103,13 @@ def main():
 
     for i in range(num_keys):
         agent.set_query(i)
-        trie_verb.reverse_lookup(agent):
+        trie_verb.reverse_lookup(agent)
         key = agent.key_str().decode('utf-8')
         for id in key_id_dict[key]:
             f_out.write(struct.pack('=LL', id[0], id[1]))
 
     f_in.close()
-    f_out_text.close()
+    f_out.close()
     print 'Done.'
 
 if __name__ == '__main__':
