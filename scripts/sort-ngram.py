@@ -130,7 +130,7 @@ def main():
             k = fields[1].encode('utf-8')
             keyset_pair.push_back(k)
             pair = k.split(PAIR_SEPARATOR, 1);
-            if len(pair) > 1:
+            if k[0] != '<' and len(pair) > 1 and pair[1][-1] == '/':
                 keyset_key.push_back(pair[0])
 
             pair_dict[k] = (float(fields[0]), float(fields[2]), fields[1])
