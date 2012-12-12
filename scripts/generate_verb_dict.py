@@ -17,6 +17,7 @@ EXT_PAIR = '.pair'
 EXT_VERB_KEY = '.verbkey'
 EXT_VERB_DATA = '.verbdata'
 PAIR_SEPARATOR = '/'
+INFLECTION_START_ORD = ord('0')
 POTENTIAL_MASK = 0x40000000
 
 def Usage():
@@ -67,16 +68,21 @@ def main():
     for line in f_in:
         line = line.rstrip('\n')
         fields = line.split('\t')
+
+        codes = [(ord(x[-1]) - INFLECTION_START_ORD) if x[-2] == '/' else 0
+                 for x in fields[1:]]
         
-        is_potential = False
         if len(fields) == 4:
-            fields[2:3] = []
-            is_potential = True
+            fields[2] = fields[2][:-2]
             
         field_ids = [to_id(trie_pair, agent, x.encode('utf-8')) for x
                      in fields[1:]]
-        if is_potential:
-            field_ids[1] |= POTENTIAL_MASK
+
+        for i in range(len(field_ids)):
+            field_ids[i] |= (codes[i] << 24)
+
+        if len(field_ids) == 2:
+            field_ids.append(0xFFFFFFFF)
 
         key_id_dict.setdefault(fields[0], []).append(tuple(field_ids))
         keyset.push_back(fields[0].encode('utf-8'))
@@ -99,14 +105,14 @@ def main():
         key = agent.key_str().decode('utf-8')
 
         for id in key_id_dict[key]:
-            pos += 2
+            pos += 3
 
     for i in range(num_keys):
         agent.set_query(i)
         trie_verb.reverse_lookup(agent)
         key = agent.key_str().decode('utf-8')
         for id in key_id_dict[key]:
-            f_out.write(struct.pack('=LL', id[0], id[1]))
+            f_out.write(struct.pack('=LLL', id[0], id[1], id[2]))
 
     f_in.close()
     f_out.close()
