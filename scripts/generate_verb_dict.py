@@ -64,6 +64,7 @@ def main():
 
     key_id_dict = {}
     keyset = marisa.Keyset()
+    num_data = 0
 
     for line in f_in:
         line = line.rstrip('\n')
@@ -82,9 +83,10 @@ def main():
             field_ids[i] |= (codes[i] << 24)
 
         if len(field_ids) == 2:
-            field_ids.append(0xFFFFFFFF)
+            field_ids[1:1] = [0xFFFFFFFF]
 
         key_id_dict.setdefault(fields[0], []).append(tuple(field_ids))
+        num_data += 1
         keyset.push_back(fields[0].encode('utf-8'))
         
     trie_verb = marisa.Trie()
@@ -93,26 +95,31 @@ def main():
 
     num_keys = trie_verb.num_keys()
     f_out = open(dictionary_filename_prefix + EXT_VERB_DATA, 'wb')
-    f_out.write(struct.pack('=L', num_keys))
+    f_out.write(struct.pack('=LL', num_keys + 1, num_data)) # + 1: sentinel
 
-    pos = 1 + num_keys
-    size = 4 # sizeof(long)
+    pos = 0
 
     for i in range(num_keys):
-        f_out.write(struct.pack('=L', pos * size))
+        f_out.write(struct.pack('=L', pos))
         agent.set_query(i)
         trie_verb.reverse_lookup(agent)
         key = agent.key_str().decode('utf-8')
 
         for id in key_id_dict[key]:
-            pos += 3
+            pos += 1
 
+    f_out.write(struct.pack('=L', pos)) # sentinel
+
+    num_data_written = 0
     for i in range(num_keys):
         agent.set_query(i)
         trie_verb.reverse_lookup(agent)
         key = agent.key_str().decode('utf-8')
         for id in key_id_dict[key]:
             f_out.write(struct.pack('=LLL', id[0], id[1], id[2]))
+            num_data_written += 1
+
+    assert(num_data == num_data_written)
 
     f_in.close()
     f_out.close()
