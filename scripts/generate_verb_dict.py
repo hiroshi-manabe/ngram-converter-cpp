@@ -30,6 +30,7 @@ def Usage():
 def to_id(trie, agent, query_key):
     agent.set_query(query_key)
     if not trie.lookup(agent):
+        print query_key
         raise KeyError
 
     return agent.key_id()

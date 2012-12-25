@@ -7,7 +7,7 @@ TEST_OBJ	:= obj/converter_test.o
 MAIN_CMD	:= converter-main
 TEST_CMD	:= test
 
-CXXFLAGS	?= -Wall -O2
+CXXFLAGS	?= -Wall -O0 -g
 CPPFLAGS	+= $(shell pkg-config --cflags marisa)
 LDFLAGS		+= $(shell pkg-config --libs marisa)
 CPPFLAGS_TEST	:= -I/usr/local/include
@@ -26,7 +26,7 @@ $(MAIN_CMD): $(OBJS) $(MAIN_OBJ)
 
 $(TEST_CMD): $(OBJS) $(TEST_OBJ)
 	$(CXX) $^ $(LDFLAGS) $(LDFLAGS_TEST) -o $@
-	./$(TEST_CMD)
+#	./$(TEST_CMD)
 
 .PHONY: clean
 

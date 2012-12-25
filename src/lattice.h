@@ -39,7 +39,7 @@ class Lattice {
   void GetEndNodesAt(int pos, const map<Node, Node>** nodes);
 
  private:
-  vector<map<Node, Node> > end_nodes_;
+  map<uint32_t, map<Node, Node> > end_nodes_;
 };
 
 }  // namespace NgramConverter

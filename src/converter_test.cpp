@@ -13,7 +13,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-#define PATH_TEST_FILES "test_data/test"
+#define PATH_TEST_FILES "test_data/small"
 #define TEST_MAX_N 4
 
 namespace {
@@ -38,7 +38,7 @@ public:
 };
 
 TEST_F(LMTest, GetPairsTest) {
-  const string str("かれは");
+  const string str("カレハ");
   vector<NgramConverter::Pair> results;
 
   lm.GetPairs(str, &results);
@@ -50,13 +50,15 @@ TEST_F(LMTest, GetPairsTest) {
 
   for (vector<NgramConverter::Pair>::const_iterator it = results.begin();
        it != results.end(); ++it) {
-    if (it->src_str == "かれは" && it->dst_str == "枯葉") {
+    if (it->src_str == "カレハ" &&
+	it->dst_str == "カレハ/枯れ葉/名詞-普通名詞-一般/") {
       found_kareha = true;
-    } else if (it->src_str == "かれ" && it->dst_str == "彼") {
+    } else if (it->src_str == "カレ" && it->dst_str == "カレ/彼/代名詞/") {
       found_kare = true;
-    } else if (it->src_str == "か" && it->dst_str == "か") {
+    } else if (it->src_str == "カ" && it->dst_str == "カ/か/助詞-係助詞/") {
       found_ka_1 = true;
-    } else if (it->src_str == "か" && it->dst_str == "蚊") {
+    } else if (it->src_str == "カ" && it->dst_str ==
+	       "カ/蚊/名詞-普通名詞-一般/") {
       found_ka_2 = true;
     }
   }
@@ -68,36 +70,24 @@ TEST_F(LMTest, GetPairsTest) {
 }
 
 TEST_F(LMTest, NgramTest) {
-  vector<string> src_strs;
-  src_strs.push_back("きょう");
-  src_strs.push_back("は");
-  src_strs.push_back("い");
-  src_strs.push_back("い");
-  
   vector<string> dst_strs;
-  dst_strs.push_back("今日");
-  dst_strs.push_back("は");
-  dst_strs.push_back("い");
-  dst_strs.push_back("い");
+  dst_strs.push_back("キョウ/今日/名詞-普通名詞-副詞可能/");
+  dst_strs.push_back("ハ/は/助詞-係助詞/");
 
   vector<NgramConverter::NgramData> expected_data;
-  NgramConverter::NgramData d1 = { 29315, 0, -4.089, -0.287 };
-  NgramConverter::NgramData d2 = { 1110, 29315, -0.840, -0.035 };
-  NgramConverter::NgramData d3 = { 1073, 41356, -1.305, -0.191 };
-  NgramConverter::NgramData d4 = { 1073, 20177, -0.320, INVALID_SCORE };
+  NgramConverter::NgramData d1 = { 54493, 0, -3.951135, -0.470866 };
+  NgramConverter::NgramData d2 = { 107004, 54493, -1.039273, -0.025837 };
   expected_data.push_back(d1);
   expected_data.push_back(d2);
-  expected_data.push_back(d3);
-  expected_data.push_back(d4);
 
   uint32_t context_id = 0;
   NgramConverter::NgramData ngram;
-  for (size_t i = 0; i < src_strs.size(); ++i) {
+  for (size_t i = 0; i < dst_strs.size(); ++i) {
     uint32_t token_id;
     uint32_t new_context_id;
 
     EXPECT_EQ(expected_data[i].context_id, context_id);
-    EXPECT_TRUE(lm.GetTokenId(src_strs[i], dst_strs[i], &token_id));
+    EXPECT_TRUE(lm.GetTokenId(dst_strs[i], &token_id));
     EXPECT_TRUE(lm.GetNgram(i+1, token_id, context_id, &new_context_id,
 			    &ngram));
     EXPECT_TRUE(IsNear(ngram.score, expected_data[i].score));
@@ -106,7 +96,7 @@ TEST_F(LMTest, NgramTest) {
 }
 
 TEST_F(LMTest, ConvertTest) {
-  string src = "きょうはいいてんきですね。";
+  string src = "シコル。";
   string dst;
   string expected = "今日はいい天気ですね。";
   NgramConverter::Converter converter(&lm);

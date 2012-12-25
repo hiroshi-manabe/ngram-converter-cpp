@@ -117,7 +117,7 @@ def main():
             continue
 
         if len(fields) == 2:
-            fields.append('-99')
+            fields.append('0.0')
 
         score = float(fields[0])
         backoff = float(fields[2])

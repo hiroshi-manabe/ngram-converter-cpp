@@ -6,6 +6,7 @@
 #include "lattice.h"
 
 using std::list;
+using std::map;
 using std::vector;
 
 namespace NgramConverter {
@@ -22,14 +23,13 @@ bool Converter::Convert(string src, string* dst) {
   }
   Pair bos_pair;
   uint32_t bos_token_id;
-  if (!lm_->GetTokenId(BOS_STR, "", &bos_token_id)) {
+  if (!lm_->GetTokenId(BOS_STR, &bos_token_id)) {
     return false;
   }
   bos_pair.token_id = bos_token_id;
   bos_pair.src_str = bos_pair.dst_str = "";
 
-  vector<map<Node, Node> > node_cache;
-  node_cache.resize(src.size() + 2);  // the end pos of EOS is size+1
+  map<uint32_t, map<Node, Node> > node_cache;
 
   Node start_node;
   start_node.pair = &bos_pair;
@@ -54,11 +54,14 @@ bool Converter::Convert(string src, string* dst) {
   }
   node_cache[0].insert(pair<Node, Node>(start_node, start_node));
 
-  for (size_t pos = 0; pos <= src.size(); ++pos) {
-    const vector<Pair>* pairs;
-    pair_manager.GetPairsAt(pos, &pairs);
+  const map<uint32_t, vector<Pair> >& pos_map = pair_manager.GetMapRef();
 
-    if (pairs->size()) {
+  for (map<uint32_t, vector<Pair> >::const_iterator it_pos = pos_map.begin();
+       it_pos != pos_map.end(); ++it_pos) {
+    uint32_t pos = it_pos->first;
+    const vector<Pair>& pairs = it_pos->second;
+
+    if (pairs.size()) {
       Node zero_length_node;
       zero_length_node.end_pos = pos;
       zero_length_node.valid_n = 0;
@@ -72,10 +75,10 @@ bool Converter::Convert(string src, string* dst) {
       continue;
     }
 
-    for (vector<Pair>::const_iterator it_right = pairs->begin();
-	 it_right != pairs->end(); ++it_right) {
+    for (vector<Pair>::const_iterator it_right = pairs.begin();
+	 it_right != pairs.end(); ++it_right) {
       const Pair& right = *it_right;
-      int right_pos = pos + right.src_str.size();
+      int right_pos = pos + right.length;
       const map<Node, Node>* nodes;
 
       lattice.GetEndNodesAt(pos, &nodes);
@@ -134,7 +137,7 @@ bool Converter::Convert(string src, string* dst) {
   }
 
   const map<Node, Node>* end_nodes;
-  lattice.GetEndNodesAt(src.size() + 1, &end_nodes);
+  lattice.GetEndNodesAt(src.size() * MAX_INFLECTION + 1, &end_nodes);
 
   const Node* end_node = NULL;
   for (map<Node, Node>::const_iterator it = end_nodes->begin();
@@ -151,7 +154,12 @@ bool Converter::Convert(string src, string* dst) {
   *dst = "";
   for (list<const Node*>::const_iterator it = best_path.begin();
        it != best_path.end(); ++it) {
-    *dst += (*it)->pair->dst_str;
+    string str = (*it)->pair->dst_str;
+    if (str.empty()) {
+      lm_->GetPairStringFromId((*it)->pair->token_id, &str);
+    }
+    *dst += str;
+    *dst += " ";
   }
   return true;
 }

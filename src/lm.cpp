@@ -165,12 +165,16 @@ bool LM::LoadDics(const string filename_prefix) {
   if (!LoadNgrams(filename_prefix)) {
     return false;
   }
+  if (!LoadVerbs(filename_prefix)) {
+    return false;
+  }
   return true;
 }
 
 bool LM::LoadTries(const string filename_prefix) {
   trie_key_.load((filename_prefix + EXT_KEY).c_str());
   trie_pair_.load((filename_prefix + EXT_PAIR).c_str());
+  trie_verb_.load((filename_prefix + EXT_VERB_KEY).c_str());
   return true;
 }
 
@@ -254,6 +258,47 @@ bool LM::LoadNgrams(const string filename_prefix) {
   return is_success;
 }
 
+bool LM::LoadVerbs(const string filename_prefix) {
+  bool is_success = false;
+  size_t size_read;
+
+  uint32_t verb_key_count;
+  uint32_t verb_data_count;
+
+  FILE* fp_data = fopen((filename_prefix + EXT_VERB_DATA).c_str(), "rb");
+
+  size_read = fread(&verb_key_count, sizeof(uint32_t), 1, fp_data);
+  if (size_read < 1) {
+    goto LOAD_VERBS_END;
+  }
+  verb_key_count_ = verb_key_count;
+
+  size_read = fread(&verb_data_count, sizeof(uint32_t), 1, fp_data);
+  if (size_read < 1) {
+    goto LOAD_VERBS_END;
+  }
+
+  verb_keys_.reset(new uint32_t[verb_key_count]);
+  size_read = fread(verb_keys_.get(), sizeof(uint32_t), verb_key_count,
+		    fp_data);
+  if (size_read < verb_key_count) {
+    goto LOAD_VERBS_END;
+  }
+
+  verb_data_.reset(new VerbData[verb_data_count]);
+  size_read = fread(verb_data_.get(), sizeof(VerbData), verb_data_count,
+		    fp_data);
+  if (size_read < verb_data_count) {
+    goto LOAD_VERBS_END;
+  }
+  is_success = true;
+
+ LOAD_VERBS_END:
+  fclose(fp_data);
+  
+  return is_success;
+}
+
 void LM::GetUnigram(int token_id, NgramData* ngram) const {
   ngram->token_id = token_id;
   ngram->context_id = 0;
@@ -318,21 +363,16 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   return false;
 }
 
-bool LM::GetTokenId(const string src, const string dst,
+bool LM::GetTokenId(const string key,
 		    uint32_t* token_id) const {
   marisa::Agent agent;
   
-  char key[MAX_KEY_LEN+1];
-  string str_key = src;
-  if (!dst.empty()) {
-    str_key += PAIR_SEPARATOR;
-    str_key += dst;
-  }
-  if (str_key.size() > MAX_KEY_LEN) {
+  char char_key[MAX_KEY_LEN+1];
+  if (key.size() > MAX_KEY_LEN) {
     return false;
   }
-  strcpy(key, str_key.c_str());
-  agent.set_query(key);
+  strcpy(char_key, key.c_str());
+  agent.set_query(char_key);
 
   if (!trie_pair_.lookup(agent)) {
     return false;
@@ -365,19 +405,71 @@ bool LM::GetPairs(const string src, vector<Pair>* results) const {
       if (pos == string::npos || pos >= pair_str.size() - 1) {
 	return false;
       }
-
+      if (pair_str.substr(pair_str.size() - PAIR_SEPARATOR_LEN,
+			  PAIR_SEPARATOR_LEN) != PAIR_SEPARATOR) {
+	continue;
+      }
+      
       string src = pair_str.substr(0, pos);
-      string dst = pair_str.substr(pos + strlen(PAIR_SEPARATOR));
+      string dst = pair_str;
 
       Pair pair;
       pair.src_str = src;
       pair.dst_str = dst;
       pair.token_id = token_id;
+      pair.length = src.size() * MAX_INFLECTION;
 
       results->push_back(pair);
     }
   }
   return true;
+}
+
+bool LM::GetVerbs(const string src, vector<vector<PairInflection> >* results)
+  const {
+  marisa::Agent agent_key;
+  char buf[MAX_KEY_LEN+1];
+
+  strncpy(buf, src.c_str(), MAX_KEY_LEN);
+  agent_key.set_query(buf, src.size());
+
+  while (trie_verb_.common_prefix_search(agent_key)) {
+    uint32_t verb_index = agent_key.key().id();
+    uint32_t length = agent_key.key().length();
+    if (verb_index >= verb_key_count_ - 1) {
+      return false;
+    }
+
+    uint32_t end = verb_keys_[verb_index + 1];
+    for (uint32_t i = verb_keys_[verb_index]; i < end; ++i) {
+      vector<PairInflection> v;
+      uint32_t code = verb_data_[i].main_verb;
+
+      PairInflection main_pair(code, INVALID_CODE, length);
+      v.push_back(main_pair);
+
+      if (verb_data_[i].potential_verb != INVALID_CODE) {
+	PairInflection potential_pair(verb_data_[i].potential_verb,
+				      code, length);
+	v.push_back(potential_pair);
+	code = verb_data_[i].potential_verb;
+      }
+
+      PairInflection inflection_tail(verb_data_[i].inflection_tail,
+				     code, length);
+      v.push_back(inflection_tail);
+
+      results->push_back(v);
+    }
+  }
+  return true;
+}
+
+void LM::GetPairStringFromId(uint32_t token_id, string* str) {
+  marisa::Agent agent;
+  agent.set_query(token_id);
+  trie_pair_.reverse_lookup(agent);
+  str->assign(agent.key().ptr(), agent.key().length());
 }
 
 }  // namespace NgramConverter

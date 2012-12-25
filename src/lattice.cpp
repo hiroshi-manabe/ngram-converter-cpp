@@ -71,7 +71,6 @@ string Node::d() const {
 }
 
 Lattice::Lattice(size_t len) {
-  end_nodes_.resize(len + 1);
 }
 
 bool Lattice::AddNode(Node node) {
