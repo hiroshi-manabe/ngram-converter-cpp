@@ -34,12 +34,12 @@ bool PairManager::Build(const string src, const LM& lm) {
   for (size_t pos = 0; pos < src.size(); pos = NextUtf8Pos(src, pos)) {
     vector<Pair> results;
 
-    if (!lm.GetPairs(src.substr(pos), &results)) {
+    if (!lm.GetPairs(src, pos, &results)) {
       return false;
     }
     for (vector<Pair>::const_iterator it = results.begin();
 	 it != results.end(); ++it) {
-      pos_map_[pos * MAX_INFLECTION].push_back(*it);
+      pos_map_[it->start_pos].push_back(*it);
     }
     if (results.size() == 0) {
       size_t next_pos = NextUtf8Pos(src, pos);

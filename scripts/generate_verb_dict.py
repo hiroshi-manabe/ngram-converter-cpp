@@ -18,7 +18,6 @@ EXT_VERB_KEY = '.verbkey'
 EXT_VERB_DATA = '.verbdata'
 PAIR_SEPARATOR = '/'
 INFLECTION_START_ORD = ord('0')
-POTENTIAL_MASK = 0x40000000
 
 def Usage():
     print sys.argv[0] + ' - generate a verb dictionary.'
@@ -73,9 +72,10 @@ def main():
 
         codes = [(ord(x[-1]) - INFLECTION_START_ORD) if x[-2] == '/' else 0
                  for x in fields[1:]]
-        
-        if len(fields) == 4:
-            fields[2] = fields[2][:-2]
+
+        for i in range(2, len(fields)):
+            if fields[i][-2] == '/':
+                fields[i] = fields[2][:-2]
             
         field_ids = [to_id(trie_pair, agent, x.encode('utf-8')) for x
                      in fields[1:]]

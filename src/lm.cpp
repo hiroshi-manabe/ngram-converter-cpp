@@ -299,6 +299,67 @@ bool LM::LoadVerbs(const string filename_prefix) {
   return is_success;
 }
 
+bool LM::LoadTekei(const string filename_prefix) {
+  bool is_success = false;
+  size_t size_read;
+  size_t size_all;
+
+  FILE* fp_data = fopen((filename_prefix + EXT_TEKEI).c_str(), "rb");
+  size_read = fread(&tekei_sei_code_, sizeof(uint8_t), 1, fp_data);
+  if (size_read < 1) {
+    goto LOAD_TEKEI_END;
+  }
+  size_read = fread(&tekei_daku_code_, sizeof(uint8_t), 1, fp_data);
+  if (size_read < 1) {
+    goto LOAD_TEKEI_END;
+  }
+  fseek(fp_data, 0, SEEK_END);
+  size_all = ftell(fp_data);
+  tekei_data_count_ = (size_all - sizeof(uint8_t) * 2) / sizeof(TekeiData);
+  tekei_data_.reset(new TekeiData[tekei_data_count_]);
+  size_read = fread(tekei_data_.get(), sizeof(TekeiData), tekei_data_count_, 
+		    fp_data);
+  if (size_read < tekei_data_count_) {
+    goto LOAD_TEKEI_END;
+  }
+  is_success = true;
+
+ LOAD_TEKEI_END:
+  fclose(fp_data);
+
+  return is_success;  
+}
+
+bool LM::IsTekei(uint32_t token_id, uint32_t* normalized_id, uint8_t* code)
+  const {
+  for (size_t i = 0; i < tekei_data_count_; ++i) {
+    if (tekei_data_[i].tekei_id == token_id) {
+      if (tekei_data_[i].normalized_id == INVALID_CODE) {
+	*code = tekei_sei_code_;
+	*normalized_id = token_id;
+      } else {
+	*code = tekei_daku_code_;
+	*normalized_id = tekei_data_[i].normalized_id;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool LM::AdjustTekei(Pair* p) const {
+  uint8_t code;
+  uint32_t normalized_id;
+  if (IsTekei(p->token_id, &normalized_id, &code)) {
+    if (p->start_pos == 0) {
+      return false;
+    }
+    p->token_id = normalized_id;
+    p->start_pos += code - MAX_INFLECTION;
+  }
+  return true;
+}
+
 void LM::GetUnigram(int token_id, NgramData* ngram) const {
   ngram->token_id = token_id;
   ngram->context_id = 0;
@@ -382,11 +443,14 @@ bool LM::GetTokenId(const string key,
   return true;
 }
 
-bool LM::GetPairs(const string src, vector<Pair>* results) const {
+bool LM::GetPairs(const string src, size_t pos, vector<Pair>* results) const {
   marisa::Agent agent_key;
   char buf[MAX_KEY_LEN+1];
+  if (pos >= src.size()) {
+    return false;
+  }
 
-  strncpy(buf, src.c_str(), MAX_KEY_LEN);
+  strncpy(buf, src.c_str() + pos, MAX_KEY_LEN);
   agent_key.set_query(buf, src.size());
 
   while (trie_key_.common_prefix_search(agent_key)) {
@@ -417,7 +481,11 @@ bool LM::GetPairs(const string src, vector<Pair>* results) const {
       pair.src_str = src;
       pair.dst_str = dst;
       pair.token_id = token_id;
+      pair.start_pos = pos * MAX_INFLECTION;
       pair.length = src.size() * MAX_INFLECTION;
+      if (!AdjustTekei(&pair)) {
+	continue;
+      }
 
       results->push_back(pair);
     }
@@ -446,6 +514,11 @@ bool LM::GetVerbs(const string src, vector<vector<PairInflection> >* results)
       uint32_t code = verb_data_[i].main_verb;
 
       PairInflection main_pair(code, INVALID_CODE, length);
+
+      if (!AdjustTekei(&main_pair.pair)) {
+	continue;
+      }
+
       v.push_back(main_pair);
 
       if (verb_data_[i].potential_verb != INVALID_CODE) {

@@ -23,6 +23,7 @@ struct Pair {
   string src_str;
   string dst_str;
   uint32_t token_id;
+  uint32_t start_pos;
   uint32_t length;
 };
 
