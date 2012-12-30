@@ -13,7 +13,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-#define PATH_TEST_FILES "test_data/small"
+#define PATH_TEST_FILES "temp/small"
 #define TEST_MAX_N 4
 
 namespace {
@@ -41,7 +41,7 @@ TEST_F(LMTest, GetPairsTest) {
   const string str("カレハ");
   vector<NgramConverter::Pair> results;
 
-  lm.GetPairs(str, &results);
+  lm.GetPairs(str, 0, &results);
 
   bool found_kareha = false;
   bool found_kare = false;
@@ -96,7 +96,7 @@ TEST_F(LMTest, NgramTest) {
 }
 
 TEST_F(LMTest, ConvertTest) {
-  string src = "シコル。";
+  string src = "ミタ";
   string dst;
   string expected = "今日はいい天気ですね。";
   NgramConverter::Converter converter(&lm);

@@ -64,8 +64,8 @@ class LM {
 		NgramData* ngram_data) const;
   bool GetTokenId(const string key, uint32_t* token_id) const;
   bool GetPairs(const string src, size_t pos, vector<Pair>* results) const;
-  bool GetVerbs(const string src, vector<vector<PairInflection> >* results)
-    const;
+  bool GetVerbs(const string src, size_t pos,
+		vector<vector<Pair> >* results) const;
   void GetPairStringFromId(uint32_t token_id, string* str);
 
  private:

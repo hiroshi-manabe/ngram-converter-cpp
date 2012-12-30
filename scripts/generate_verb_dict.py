@@ -75,7 +75,7 @@ def main():
 
         for i in range(2, len(fields)):
             if fields[i][-2] == '/':
-                fields[i] = fields[2][:-2]
+                fields[i] = fields[i][:-2]
             
         field_ids = [to_id(trie_pair, agent, x.encode('utf-8')) for x
                      in fields[1:]]

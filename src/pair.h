@@ -27,12 +27,6 @@ struct Pair {
   uint32_t length;
 };
 
-struct PairInflection {
-  Pair pair;
-  uint8_t inflection_code;
-  PairInflection(uint32_t code, uint32_t prev_code, uint32_t length);
-};
-
 class PairManager {
  public:
   bool Build(const string src, const LM& lm);

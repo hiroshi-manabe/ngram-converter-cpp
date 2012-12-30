@@ -57,20 +57,18 @@ bool PairManager::Build(const string src, const LM& lm) {
       pos_map_[pos * MAX_INFLECTION].push_back(unknown_pair);
     }
 
-    vector<vector<PairInflection> > results_verb;
-    if (!lm.GetVerbs(src.substr(pos), &results_verb)) {
+    vector<vector<Pair> > results_verb;
+    if (!lm.GetVerbs(src, pos, &results_verb)) {
       return false;
     }
-    for (vector<vector<PairInflection> >::const_iterator it =
+    for (vector<vector<Pair> >::const_iterator it =
 	   results_verb.begin();
 	 it != results_verb.end(); ++it) {
-      const vector<PairInflection>& v = *it;
-      uint32_t temp_pos = pos * MAX_INFLECTION;
-      for (vector<PairInflection>::const_iterator it2 =v.begin();
+      const vector<Pair>& v = *it;
+      for (vector<Pair>::const_iterator it2 =v.begin();
 	   it2 != v.end(); ++it2) {
-	Pair pair = it2->pair;
-	pos_map_[temp_pos].push_back(it2->pair);
-	temp_pos += it2->pair.length;
+	const Pair& pair = *it2;
+	pos_map_[pair.start_pos].push_back(pair);
       }
     }
   }
@@ -87,29 +85,6 @@ bool PairManager::Build(const string src, const LM& lm) {
   pos_map_[src.size() * MAX_INFLECTION].push_back(eos_pair);
   return true;
 }
-
-PairInflection::PairInflection(uint32_t code, uint32_t prev_code,
-			       uint32_t length) {
-  pair.src_str = "";
-  pair.dst_str = "";
-  pair.token_id = code & 0x00FFFFFF;
-  pair.length = 0;
-  inflection_code = ((code & 0xFF000000) >> 24);
-
-  uint8_t prev_inflection_code = 0;
-  if (prev_code != INVALID_CODE) {
-    prev_inflection_code = ((prev_code & 0xFF000000) >> 24);
-  } else {
-    pair.length = (length - 1) * MAX_INFLECTION;
-  }
-
-  if (inflection_code) {
-    pair.length += inflection_code - prev_inflection_code;
-  } else {
-    pair.length += MAX_INFLECTION - prev_inflection_code;      
-  }
-}
-
 
 const map<uint32_t, vector<Pair> >& PairManager::GetMapRef() const {
   return pos_map_;
