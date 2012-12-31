@@ -569,7 +569,7 @@ bool LM::GetVerbs(const string src, size_t pos,
 
 void LM::GetPairStringFromId(uint32_t token_id, string* str) {
   marisa::Agent agent;
-  agent.set_query(token_id);
+  agent.set_query(static_cast<int>(token_id));
   trie_pair_.reverse_lookup(agent);
   str->assign(agent.key().ptr(), agent.key().length());
 }
