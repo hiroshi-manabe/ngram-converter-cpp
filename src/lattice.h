@@ -1,6 +1,7 @@
 #ifndef NGRAM_CONVERTER_LATTICE_H_INCLUDED_
 #define NGRAM_CONVERTER_LATTICE_H_INCLUDED_
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <utility>

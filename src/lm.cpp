@@ -1,6 +1,7 @@
 #include "lm.h"
 
 #include <cstdio>
+#include <cstring>
 
 namespace {
 

@@ -7,7 +7,7 @@ TEST_OBJ	:= obj/converter_test.o
 MAIN_CMD	:= converter-main
 TEST_CMD	:= test
 
-CXXFLAGS	?= -Wall -O2
+CXXFLAGS	?= -Wall -O2 -std=c++0x
 CPPFLAGS	+= $(shell pkg-config --cflags marisa)
 LDFLAGS		+= $(shell pkg-config --libs marisa)
 CPPFLAGS_TEST	:= -I/usr/local/include
