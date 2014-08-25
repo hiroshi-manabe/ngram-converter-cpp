@@ -1,6 +1,7 @@
 #include "converter.h"
 #include "lm.h"
 
+#include <cstdlib>
 #include <iostream>
 
 using std::cin;
