@@ -7,8 +7,6 @@
 using std::string;
 using std::vector;
 
-#define UNKNOWN_STRING "UNK"
-
 namespace NgramConverter {
 
 class LM;
