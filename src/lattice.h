@@ -9,18 +9,17 @@
 
 using std::string;
 using std::map;
-using std::pair;
 using std::vector;
 
 namespace NgramConverter {
 
-struct Pair;
+struct Word;
 
 struct Node {
   uint32_t GetTokenId() const;
   bool operator<(const Node& another) const;
 
-  const Pair* pair;
+  const Word* word;
   const Node* left_node;
 
   int end_pos;

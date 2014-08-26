@@ -8,18 +8,12 @@
 #include <memory>
 #include <stdint.h>
 #include <string>
+#include <vector>
 
-#include "pair.h"
-
-using std::pair;
-using std::string;
-using std::vector;
-
-using marisa::scoped_ptr;
-using marisa::scoped_array;
+#include "word.h"
 
 #define BLOCK_SIZE 128
-#define PAIR_SEPARATOR "/"
+#define WORD_SEPARATOR "/"
 #define MAX_KEY_LEN 255
 #define MAX_N 10
 #define BOS_STR "<s>"
@@ -35,7 +29,8 @@ using marisa::scoped_array;
 #define INVALID_TOKEN_ID -1
 
 #define EXT_KEY ".key"
-#define EXT_PAIR ".pair"
+#define EXT_KEY_WORD ".key_word"
+#define EXT_WORD ".word"
 #define EXT_INDEX ".index"
 #define EXT_DATA ".data"
 #define EXT_FILTER ".filter"
@@ -65,23 +60,27 @@ struct NgramData {
 
 class LM {
  public:
-  bool LoadDics(const string filename_prefix);
-  bool LoadTries(const string filename_prefix);
-  bool LoadNgrams(const string filename_prefix);
+  bool LoadDicts(const std::string filename_prefix);
+  bool LoadTries(const std::string filename_prefix);
+  bool LoadNgrams(const std::string filename_prefix);
+  bool LoadKeyWordData(const std::string filename_prefix);
   bool GetNgram(int n, uint32_t token_id, uint32_t context_id,
 		uint32_t* new_context_id,
 		NgramData* ngram_data) const;
-  bool GetTokenId(const string src, const string dst, uint32_t* token_id) const;
-  bool GetPairs(const string src, vector<Pair>* results) const;
+  bool GetTokenId(const std::string dst, uint32_t* token_id) const;
+  bool GetWords(const std::string src, std::vector<Word>* results) const;
 
  private:
   void GetUnigram(int token_id, NgramData* ngram) const;
   marisa::Trie trie_key_;
-  marisa::Trie trie_pair_;
-  scoped_array<uint8_t> ngram_data_;
-  scoped_array<UnigramIndex> unigrams_;
-  scoped_array<NgramIndex> ngram_indices_[MAX_N];
-  scoped_array<uint8_t> filters_[MAX_N];
+  marisa::Trie trie_key_word_;
+  marisa::Trie trie_word_;
+  marisa::scoped_array<uint8_t> ngram_data_;
+  marisa::scoped_array<UnigramIndex> unigrams_;
+  marisa::scoped_array<NgramIndex> ngram_indices_[MAX_N];
+  marisa::scoped_array<uint8_t> filters_[MAX_N];
+  std::vector<std::vector<std::size_t> > key_to_words_;
+  
   size_t ngram_counts_[MAX_N];
   mutable NgramData ngram_data_work_[BLOCK_SIZE];
   int n_;

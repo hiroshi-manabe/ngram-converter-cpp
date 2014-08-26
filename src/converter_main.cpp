@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
   }
 
   NgramConverter::LM lm;
-  lm.LoadDics(input_filename_prefix);
+  lm.LoadDicts(input_filename_prefix);
   NgramConverter::Converter converter(&lm);
 
   string src;

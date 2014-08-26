@@ -1,6 +1,6 @@
 #include "converter.h"
 #include "lm.h"
-#include "pair.h"
+#include "word.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-using std::pair;
 using std::string;
 using std::vector;
 
@@ -37,18 +36,18 @@ public:
   NgramConverter::LM lm;
 };
 
-TEST_F(LMTest, GetPairsTest) {
+TEST_F(LMTest, GetWordssTest) {
   const string str("かれは");
-  vector<NgramConverter::Pair> results;
+  vector<NgramConverter::Word> results;
 
-  lm.GetPairs(str, &results);
+  lm.GetWords(str, &results);
 
   bool found_kareha = false;
   bool found_kare = false;
   bool found_ka_1 = false;
   bool found_ka_2 = false;
 
-  for (vector<NgramConverter::Pair>::const_iterator it = results.begin();
+  for (vector<NgramConverter::Word>::const_iterator it = results.begin();
        it != results.end(); ++it) {
     if (it->src_str == "かれは" && it->dst_str == "枯葉") {
       found_kareha = true;

@@ -5,7 +5,7 @@
 
 #include "lattice.h"
 #include "lm.h"
-#include "pair.h"
+#include "word.h"
 
 using std::cout;
 using std::endl;
@@ -14,7 +14,7 @@ using std::stringstream;
 namespace NgramConverter {
 
 uint32_t Node::GetTokenId() const {
-  return pair->token_id;
+  return word->token_id;
 }
 
 bool Node::operator<(const Node& another) const {
@@ -61,8 +61,8 @@ string Node::d() const {
   const Node* left = this;
 
   for (int i = 0; i < valid_n; ++i) {
-    ss << "[" << left->pair->src_str << "/" << left->pair->dst_str << "("
-       << left->pair->token_id << ")]";
+    ss << "[" << left->word->src_str << "/" << left->word->dst_str << "("
+       << left->word->token_id << ")]";
     left = left->left_node;
   }
   ss << "(c:" << context_id << ",ns:" << node_score << ",b:" << backoff

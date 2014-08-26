@@ -1,4 +1,5 @@
 #include <list>
+#include <utility>
 #include <vector>
 
 #include "converter.h"
@@ -6,6 +7,7 @@
 #include "lattice.h"
 
 using std::list;
+using std::pair;
 using std::vector;
 
 namespace NgramConverter {
@@ -16,23 +18,23 @@ Converter::Converter(LM* lm) {
 
 bool Converter::Convert(string src, string* dst) {
   Lattice lattice(src.size() + 1);
-  PairManager pair_manager;
-  if (!pair_manager.Build(src, *lm_)) {
+  WordManager word_manager;
+  if (!word_manager.Build(src, *lm_)) {
     return false;
   }
-  Pair bos_pair;
+  Word bos_word;
   uint32_t bos_token_id;
-  if (!lm_->GetTokenId(BOS_STR, "", &bos_token_id)) {
+  if (!lm_->GetTokenId(BOS_STR, &bos_token_id)) {
     return false;
   }
-  bos_pair.token_id = bos_token_id;
-  bos_pair.src_str = bos_pair.dst_str = "";
+  bos_word.token_id = bos_token_id;
+  bos_word.src_str = bos_word.dst_str = "";
 
   vector<map<Node, Node> > node_cache;
   node_cache.resize(src.size() + 2);  // the end pos of EOS is size+1
 
   Node start_node;
-  start_node.pair = &bos_pair;
+  start_node.word = &bos_word;
   start_node.left_node = NULL;
   start_node.end_pos = 0;
   start_node.context_id = 0;
@@ -41,7 +43,7 @@ bool Converter::Convert(string src, string* dst) {
 
   uint32_t new_context_id;
   NgramData ngram_data;
-  if (!lm_->GetNgram(1, bos_pair.token_id, 0, &new_context_id, &ngram_data)) {
+  if (!lm_->GetNgram(1, bos_word.token_id, 0, &new_context_id, &ngram_data)) {
     return false;
   }
   
@@ -55,10 +57,10 @@ bool Converter::Convert(string src, string* dst) {
   node_cache[0].insert(pair<Node, Node>(start_node, start_node));
 
   for (size_t pos = 0; pos <= src.size(); ++pos) {
-    const vector<Pair>* pairs;
-    pair_manager.GetPairsAt(pos, &pairs);
+    const vector<Word>* words;
+    word_manager.GetWordsAt(pos, &words);
 
-    if (pairs->size()) {
+    if (words->size()) {
       Node zero_length_node;
       zero_length_node.end_pos = pos;
       zero_length_node.valid_n = 0;
@@ -72,9 +74,9 @@ bool Converter::Convert(string src, string* dst) {
       continue;
     }
 
-    for (vector<Pair>::const_iterator it_right = pairs->begin();
-	 it_right != pairs->end(); ++it_right) {
-      const Pair& right = *it_right;
+    for (vector<Word>::const_iterator it_right = words->begin();
+	 it_right != words->end(); ++it_right) {
+      const Word& right = *it_right;
       int right_pos = pos + right.src_str.size();
       const map<Node, Node>* nodes;
 
@@ -85,7 +87,7 @@ bool Converter::Convert(string src, string* dst) {
 	const Node& left = it_left->second;
 	NgramData ngram_data;
 	Node new_node;
-	new_node.pair = &right;
+	new_node.word = &right;
 	new_node.left_node = &left;
 	new_node.end_pos = right_pos;
 
@@ -111,7 +113,7 @@ bool Converter::Convert(string src, string* dst) {
 	    }
 
 	    Node temp_node;
-	    temp_node.pair = &right;
+	    temp_node.word = &right;
 	    temp_node.left_node = &left;
 	    temp_node.end_pos = right_pos;
 	    temp_node.valid_n = n;
@@ -151,7 +153,7 @@ bool Converter::Convert(string src, string* dst) {
   *dst = "";
   for (list<const Node*>::const_iterator it = best_path.begin();
        it != best_path.end(); ++it) {
-    *dst += (*it)->pair->dst_str;
+    *dst += (*it)->word->dst_str;
   }
   return true;
 }

@@ -11,10 +11,8 @@ import sys
 #externals
 import marisa
 
-EXT_KEY = '.key'
-EXT_PAIR = '.pair'
+EXT_WORD = '.word'
 EXT_TEXT = '.lmtext'
-PAIR_SEPARATOR = '/'
 
 def Usage():
     print sys.argv[0] + ' - sort SRILM format ngram file.'
@@ -25,7 +23,9 @@ def Usage():
 
 def to_id(trie, agent, query_key):
     agent.set_query(query_key)
-    trie.lookup(agent)
+    if not trie.lookup(agent):
+        raise ValueError(query_key)
+
     return agent.key_id()
 
 def main():
@@ -71,14 +71,12 @@ def main():
     f_out_text = codecs.open(output_filename_prefix + EXT_TEXT, 'w', 'utf-8')
 
     cur_n = 0
-    pair_id = 1
-    pair_dict = {}
+    word_id = 1
+    word_dict = {}
     context_dict = {}
     context_id_dicts = [{}]
-    keyset_key = marisa.Keyset()
-    keyset_pair = marisa.Keyset()
-    trie_key = marisa.Trie()
-    trie_pair = marisa.Trie()
+    keyset_word = marisa.Keyset()
+    trie_word = marisa.Trie()
     agent = marisa.Agent()
     min_score = 99.0
     max_backoff = -99.0
@@ -92,12 +90,10 @@ def main():
             m = re.search(r'^\\(\d+)-grams:', line)
             if (cur_n and (m or re.search(r'^\\end\\', line))):
                 if  cur_n == 1:
-                    trie_key.build(keyset_key)
-                    trie_key.save(output_filename_prefix + EXT_KEY)
-                    trie_pair.build(keyset_pair)
-                    trie_pair.save(output_filename_prefix + EXT_PAIR)
-                    for k, v in pair_dict.iteritems():
-                        context_dict[(to_id(trie_pair, agent, k),)] = v
+                    trie_word.build(keyset_word)
+                    trie_word.save(output_filename_prefix + EXT_WORD)
+                    for k, v in word_dict.iteritems():
+                        context_dict[(to_id(trie_word, agent, k),)] = v
 
                 output_ngram(f_out_text, cur_n, context_dict, context_id_dicts)
 
@@ -128,12 +124,10 @@ def main():
 
         if cur_n == 1:
             k = fields[1].encode('utf-8')
-            keyset_pair.push_back(k)
-            pair = k.rsplit(PAIR_SEPARATOR, 1);
-            keyset_key.push_back(pair[0])
-            pair_dict[k] = (float(fields[0]), float(fields[2]), fields[1])
+            keyset_word.push_back(k)
+            word_dict[k] = (float(fields[0]), float(fields[2]), fields[1])
         else:
-            ngram = [to_id(trie_pair, agent, x.encode('utf-8')) for x
+            ngram = [to_id(trie_word, agent, x.encode('utf-8')) for x
                      in reversed(fields[1].split(' '))]
             context_dict[tuple(ngram)] = (float(fields[0]), float(fields[2]), fields[1])
 

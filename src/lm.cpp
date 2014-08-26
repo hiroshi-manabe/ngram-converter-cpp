@@ -1,7 +1,17 @@
 #include "lm.h"
+#include "util.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <fstream>
+#include <sstream>
+
+using std::ifstream;
+using std::size_t;
+using std::string;
+using std::stringstream;
+using std::vector;
 
 namespace {
 
@@ -159,11 +169,14 @@ inline bool CheckExistence(uint64_t id, uint8_t* buf, size_t buf_size) {
 
 namespace NgramConverter {
 
-bool LM::LoadDics(const string filename_prefix) {
+bool LM::LoadDicts(const string filename_prefix) {
   if (!LoadTries(filename_prefix)) {
     return false;
   }
   if (!LoadNgrams(filename_prefix)) {
+    return false;
+  }
+  if (!LoadKeyWordData(filename_prefix)) {
     return false;
   }
   return true;
@@ -171,7 +184,7 @@ bool LM::LoadDics(const string filename_prefix) {
 
 bool LM::LoadTries(const string filename_prefix) {
   trie_key_.load((filename_prefix + EXT_KEY).c_str());
-  trie_pair_.load((filename_prefix + EXT_PAIR).c_str());
+  trie_word_.load((filename_prefix + EXT_WORD).c_str());
   return true;
 }
 
@@ -255,6 +268,20 @@ bool LM::LoadNgrams(const string filename_prefix) {
   return is_success;
 }
 
+bool LM::LoadKeyWordData(const string filename_prefix) {
+  ifstream file(filename_prefix + EXT_KEY_WORD);
+  string str;
+  while (std::getline(file, str)) {
+    key_to_words_.push_back(vector<size_t>());
+    stringstream ss(str);
+    string item;
+    while (std::getline(ss, item, ',')) {
+      key_to_words_.back().push_back(atoi(item.c_str()));
+    }
+  }
+  return true;
+}
+
 void LM::GetUnigram(int token_id, NgramData* ngram) const {
   ngram->token_id = token_id;
   ngram->context_id = 0;
@@ -319,23 +346,20 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   return false;
 }
 
-bool LM::GetTokenId(const string src, const string dst,
+bool LM::GetTokenId(const string dst,
 		    uint32_t* token_id) const {
   marisa::Agent agent;
   
   char key[MAX_KEY_LEN+1];
-  string str_key = src;
-  if (!dst.empty()) {
-    str_key += PAIR_SEPARATOR;
-    str_key += dst;
-  }
+  string str_key = dst;
+
   if (str_key.size() > MAX_KEY_LEN) {
     return false;
   }
   strcpy(key, str_key.c_str());
   agent.set_query(key);
 
-  if (!trie_pair_.lookup(agent)) {
+  if (!trie_word_.lookup(agent)) {
     return false;
   }
 
@@ -343,39 +367,27 @@ bool LM::GetTokenId(const string src, const string dst,
   return true;
 }
 
-bool LM::GetPairs(const string src, vector<Pair>* results) const {
+bool LM::GetWords(const string src, vector<Word>* results) const {
   marisa::Agent agent_key;
+  marisa::Agent agent_word;
   char buf[MAX_KEY_LEN+1];
 
   strncpy(buf, src.c_str(), MAX_KEY_LEN);
   agent_key.set_query(buf, src.size());
 
   while (trie_key_.common_prefix_search(agent_key)) {
-    marisa::Agent agent_pair;
-    char buf2[MAX_KEY_LEN+2];
-    string key_str(agent_key.key().ptr(), agent_key.key().length());
-    key_str += PAIR_SEPARATOR;
-    strcpy(buf2, key_str.c_str());
-    agent_pair.set_query(buf2, key_str.size());
+    size_t id = agent_key.key().id();
+    for (vector<size_t>::const_iterator it = key_to_words_[id].begin();
+	 it != key_to_words_[id].end(); ++it) {
+      agent_word.set_query(*it);
+      trie_word_.reverse_lookup(agent_word);
 
-    while (trie_pair_.predictive_search(agent_pair)) {
-      string pair_str(agent_pair.key().ptr(), agent_pair.key().length());
-      uint32_t token_id = agent_pair.key().id();
-      size_t pos = pair_str.find(PAIR_SEPARATOR);
+      Word word;
+      word.src_str.assign(agent_key.key().ptr(), agent_key.key().length());
+      word.dst_str.assign(agent_word.key().ptr(), agent_word.key().length());
+      word.token_id = *it;
 
-      if (pos == string::npos || pos >= pair_str.size() - 1) {
-	return false;
-      }
-
-      string src = pair_str.substr(0, pos);
-      string dst = pair_str.substr(pos + strlen(PAIR_SEPARATOR));
-
-      Pair pair;
-      pair.src_str = src;
-      pair.dst_str = dst;
-      pair.token_id = token_id;
-
-      results->push_back(pair);
+      results->push_back(word);
     }
   }
   return true;

@@ -1,13 +1,13 @@
 CXX		?= g++
 
-OBJS		:= obj/lattice.o obj/pair.o obj/lm.o obj/converter.o
+OBJS		:= obj/lattice.o obj/word.o obj/lm.o obj/converter.o
 MAIN_OBJ	:= obj/converter_main.o
 TEST_OBJ	:= obj/converter_test.o
 
 MAIN_CMD	:= converter-main
 TEST_CMD	:= test
 
-CXXFLAGS	?= -Wall -O2 -std=c++0x
+CXXFLAGS	?= -Wall -g -O0 -std=c++0x
 CPPFLAGS	+= $(shell pkg-config --cflags marisa)
 LDFLAGS		+= $(shell pkg-config --libs marisa)
 CPPFLAGS_TEST	:= -I/usr/local/include
@@ -37,9 +37,9 @@ clean:
 	done
 	rm -f $(MAIN_CMD) $(TEST_CMD)
 
-obj/converter.o: converter.h lm.h pair.h lattice.h
-obj/converter_main.o: converter.h lm.h pair.h
-obj/converter_test.o: converter.h lm.h pair.h
-obj/lattice.o: lattice.h lm.h pair.h
-obj/lm.o: lm.h pair.h
-obj/pair.o: lm.h pair.h
+obj/converter.o: converter.h lm.h word.h lattice.h
+obj/converter_main.o: converter.h lm.h word.h
+obj/converter_test.o: converter.h lm.h word.h
+obj/lattice.o: lattice.h lm.h word.h
+obj/lm.o: lm.h word.h
+obj/word.o: lm.h word.h
