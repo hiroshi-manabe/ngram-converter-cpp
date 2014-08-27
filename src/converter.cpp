@@ -61,11 +61,10 @@ bool Converter::Convert(string src, string* dst) {
     word_manager.GetWordsAt(pos, &words);
 
     if (words->size()) {
-      Node zero_length_node;
+      Node zero_length_node = {};
       zero_length_node.end_pos = pos;
-      zero_length_node.valid_n = 0;
-      zero_length_node.backoff = 0;
       zero_length_node.path_score = INVALID_SCORE;
+
       if (!lattice.AddNode(zero_length_node)) {
 	return false;
       }
@@ -86,7 +85,7 @@ bool Converter::Convert(string src, string* dst) {
 	   it_left != nodes->end(); ++it_left) {
 	const Node& left = it_left->second;
 	NgramData ngram_data;
-	Node new_node;
+	Node new_node = {};
 	new_node.word = &right;
 	new_node.left_node = &left;
 	new_node.end_pos = right_pos;
