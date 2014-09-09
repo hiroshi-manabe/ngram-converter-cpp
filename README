@@ -21,4 +21,4 @@ From Kanji to Kana:
 > ./converter-main -i dict/bccwj4
 
 
-To build a dictionary from SRILM format N-gram file, run sort-ngram.py and generate-data.py in this order.
+To build a dictionary from SRILM format N-gram file, run sort_ngram.py, generate_data.py and generate_key_trie.py in this order.
