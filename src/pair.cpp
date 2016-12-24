@@ -7,7 +7,7 @@ using std::pair;
 
 namespace {
 
-int NextUtf8Pos(const string str, int pos) {
+int NextUtf8Pos(const string &str, int pos) {
   ++pos;
   while ((str[pos] & 0xc0) == 0x80) {
     ++pos;
@@ -19,7 +19,7 @@ int NextUtf8Pos(const string str, int pos) {
 
 namespace NgramConverter{
 
-bool PairManager::Build(const string src, const LM& lm) {
+bool PairManager::Build(const string &src, const LM &lm) {
   pairs_.resize(src.size() + 1);
 
   for (size_t pos = 0; pos < src.size(); pos = NextUtf8Pos(src, pos)) {
@@ -59,7 +59,7 @@ bool PairManager::Build(const string src, const LM& lm) {
   return true;
 }
 
-void PairManager::GetPairsAt(int pos, const vector<Pair>** pairs) const {
+void PairManager::GetPairsAt(int pos, const vector<Pair> **pairs) const {
   *pairs = &pairs_[pos];
 }
 

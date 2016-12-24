@@ -12,7 +12,7 @@ class LM;
 class Converter {
  public:
   Converter(LM* lm);
-  bool Convert(string src, string* dst);
+  bool Convert(const string &src, string *dst);
 
  private:
   LM* lm_;

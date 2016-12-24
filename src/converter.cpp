@@ -14,7 +14,7 @@ Converter::Converter(LM* lm) {
   lm_ = lm;
 }
 
-bool Converter::Convert(string src, string* dst) {
+bool Converter::Convert(const string &src, string *dst) {
   Lattice lattice(src.size() + 1);
   PairManager pair_manager;
   if (!pair_manager.Build(src, *lm_)) {
@@ -31,7 +31,7 @@ bool Converter::Convert(string src, string* dst) {
   vector<map<Node, Node> > node_cache;
   node_cache.resize(src.size() + 2);  // the end pos of EOS is size+1
 
-  Node start_node;
+  Node start_node = {};
   start_node.pair = &bos_pair;
   start_node.left_node = NULL;
   start_node.end_pos = 0;
@@ -59,7 +59,7 @@ bool Converter::Convert(string src, string* dst) {
     pair_manager.GetPairsAt(pos, &pairs);
 
     if (pairs->size()) {
-      Node zero_length_node;
+      Node zero_length_node = {};
       zero_length_node.end_pos = pos;
       zero_length_node.valid_n = 0;
       zero_length_node.backoff = 0;
@@ -84,7 +84,7 @@ bool Converter::Convert(string src, string* dst) {
 	   it_left != nodes->end(); ++it_left) {
 	const Node& left = it_left->second;
 	NgramData ngram_data;
-	Node new_node;
+	Node new_node = {};
 	new_node.pair = &right;
 	new_node.left_node = &left;
 	new_node.end_pos = right_pos;

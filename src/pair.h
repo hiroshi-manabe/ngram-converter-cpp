@@ -21,8 +21,8 @@ struct Pair {
 
 class PairManager {
  public:
-  bool Build(const string src, const LM& lm);
-  void GetPairsAt(int pos, const vector<Pair>** pairs) const;
+  bool Build(const string &src, const LM &lm);
+  void GetPairsAt(int pos, const vector<Pair> **pairs) const;
 
  private:
   vector<vector<Pair> > pairs_;

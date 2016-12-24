@@ -159,7 +159,7 @@ inline bool CheckExistence(uint64_t id, uint8_t* buf, size_t buf_size) {
 
 namespace NgramConverter {
 
-bool LM::LoadDics(const string filename_prefix) {
+bool LM::LoadDics(const string &filename_prefix) {
   if (!LoadTries(filename_prefix)) {
     return false;
   }
@@ -169,13 +169,13 @@ bool LM::LoadDics(const string filename_prefix) {
   return true;
 }
 
-bool LM::LoadTries(const string filename_prefix) {
+bool LM::LoadTries(const string &filename_prefix) {
   trie_key_.load((filename_prefix + EXT_KEY).c_str());
   trie_pair_.load((filename_prefix + EXT_PAIR).c_str());
   return true;
 }
 
-bool LM::LoadNgrams(const string filename_prefix) {
+bool LM::LoadNgrams(const string &filename_prefix) {
   bool is_success = false;
   size_t size_read;
   size_t size_to_read;
@@ -319,7 +319,7 @@ bool LM::GetNgram(int n, uint32_t token_id, uint32_t context_id,
   return false;
 }
 
-bool LM::GetTokenId(const string src, const string dst,
+bool LM::GetTokenId(const string &src, const string &dst,
 		    uint32_t* token_id) const {
   marisa::Agent agent;
   
@@ -343,7 +343,7 @@ bool LM::GetTokenId(const string src, const string dst,
   return true;
 }
 
-bool LM::GetPairs(const string src, vector<Pair>* results) const {
+bool LM::GetPairs(const string &src, vector<Pair>* results) const {
   marisa::Agent agent_key;
   char buf[MAX_KEY_LEN+1];
 

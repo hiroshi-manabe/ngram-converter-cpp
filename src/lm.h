@@ -65,14 +65,14 @@ struct NgramData {
 
 class LM {
  public:
-  bool LoadDics(const string filename_prefix);
-  bool LoadTries(const string filename_prefix);
-  bool LoadNgrams(const string filename_prefix);
+  bool LoadDics(const string &filename_prefix);
+  bool LoadTries(const string &filename_prefix);
+  bool LoadNgrams(const string &filename_prefix);
   bool GetNgram(int n, uint32_t token_id, uint32_t context_id,
 		uint32_t* new_context_id,
 		NgramData* ngram_data) const;
-  bool GetTokenId(const string src, const string dst, uint32_t* token_id) const;
-  bool GetPairs(const string src, vector<Pair>* results) const;
+  bool GetTokenId(const string &src, const string &dst, uint32_t* token_id) const;
+  bool GetPairs(const string &src, vector<Pair>* results) const;
 
  private:
   void GetUnigram(int token_id, NgramData* ngram) const;
