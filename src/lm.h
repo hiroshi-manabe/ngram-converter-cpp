@@ -24,7 +24,7 @@ using marisa::scoped_array;
 #define MAX_N 10
 #define BOS_STR "<s>"
 #define EOS_STR "</s>"
-#define UNK_STR "<unk>"
+#define UNK_STR "UNK"
 
 #define MAX_INT_SCORE 255
 #define BACKOFF_DISCOUNT 128
